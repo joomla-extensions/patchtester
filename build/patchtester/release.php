@@ -105,7 +105,7 @@ if (file_exists($rootPath . $manifestFile))
 }
 
 // Replaces the `__DEPLOY_VERSION__` marker with the "release" version number
-system('cd ' . $rootPath . ' && find administrator -name "*.php" -type f -exec sed -i "" "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
+system('cd ' . $rootPath . ' && find administrator -name "*.php" -type f -exec sed -i "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
 
 // If not instructed to exclude it, update the update server's manifest
 if (!isset($opts['exclude-manifest']))
@@ -114,7 +114,7 @@ if (!isset($opts['exclude-manifest']))
 	{
 		$fileContents = file_get_contents($rootPath . $updateServerFile);
 		$fileContents = preg_replace('#<infourl title="Patch Tester Component">[^<]*</infourl>#', '<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/' . $version['release'] . '</infourl>', $fileContents);
-		$fileContents = preg_replace('#<downloadurl type="full" format="zip">[^<]*</downloadurl>#', '<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/' . $version['release'] . '/com_patchtester.zip</downloadurl>', $fileContents);
+		$fileContents = preg_replace('#<downloadurl type="full" format="zip">[^<]*</downloadurl>#', '<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/' . $version['release'] . '/com_patchtester_' . $version['release'] . '.zip</downloadurl>', $fileContents);
 		file_put_contents($rootPath . $updateServerFile, $fileContents);
 
 		echo '*************' . PHP_EOL;

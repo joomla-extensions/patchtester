@@ -59,31 +59,8 @@
 				onchange="jQuery('#jform_gh_user, #jform_gh_password, #jform_gh_token').val('');"
 		>
 			<option value="">JNONE</option>
-			<option value="credentials">COM_PATCHTESTER_FIELD_GH_AUTH_OPTION_CREDENTIALS</option>
 			<option value="token">COM_PATCHTESTER_FIELD_GH_AUTH_OPTION_TOKEN</option>
 		</field>
-
-		<!-- Note: Default username is a space to avoid browser autocomplete. -->
-		<field
-				name="gh_user"
-				type="text"
-				label="COM_PATCHTESTER_FIELD_GH_USER_LABEL"
-				description="COM_PATCHTESTER_FIELD_GH_USER_DESC"
-				autocomplete="off"
-				default=" "
-				showon="gh_auth:credentials"
-		/>
-
-		<field
-				name="gh_password"
-				type="password"
-				label="COM_PATCHTESTER_FIELD_GH_PASSWORD_LABEL"
-				description="COM_PATCHTESTER_FIELD_GH_PASSWORD_DESC"
-				hiddenDescription="true"
-				autocomplete="off"
-				default=""
-				showon="gh_auth:credentials"
-		/>
 
 		<field
 				name="gh_token"

@@ -22,13 +22,13 @@
 		<description>Joomla! CMS Patch Tester Component</description>
 		<element>com_patchtester</element>
 		<type>component</type>
-		<version>3.0.0-rc</version>
+		<version>3.0.0</version>
 		<client>administrator</client>
-		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/3.0.0.rc</infourl>
+		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/3.0.0</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/3.0.0.rc/com_patchtester.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/3.0.0/com_patchtester.zip</downloadurl>
 		</downloads>
-		<sha384>adb3d5521c136266eb110c42d466578bd4c8e16c4ef1d989aeeb4e383bdaee20a68297e069a0e9273ba918850bdd59a0</sha384>
+		<sha384>0cafdeb2cfbe5b509e8c885c8d96098ba52d984fb37693fc753d64c736bfe148d44742fad21bc2bec4b1c9904df1cfd3</sha384>
 		<tags>
 			<tag>rc</tag>
 		</tags>
@@ -39,13 +39,13 @@
 		<description>Joomla! CMS Patch Tester Component</description>
 		<element>com_patchtester</element>
 		<type>component</type>
-		<version>4.0.0</version>
+		<version>4.1.0</version>
 		<client>administrator</client>
-		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.0.0</infourl>
+		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.1.0</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.0.0/com_patchtester.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.1.0/com_patchtester_4.1.0.zip</downloadurl>
 		</downloads>
-		<sha384>9e1d14154108bc6cccded9a98382d1e15fd45c6061640a78c871d4c17f24d93cb2d1d679ce36e693e875f0a3edc43130</sha384>
+		<sha384>92a8627f90ddaf6efa573162774c82f7bc5628b3a4ee5862e651662e6e5b3c6d6c948793732cdd15d8c850768e3491ab</sha384>
 		<tags>
 			<tag>stable</tag>
 		</tags>

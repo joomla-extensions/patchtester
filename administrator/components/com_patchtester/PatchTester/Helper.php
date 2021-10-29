@@ -48,12 +48,6 @@ abstract class Helper
 		{
 			$options->set('headers', ['Authorization' => 'token ' . $params->get('gh_token', '')]);
 		}
-		// Set the username and password if set in the params
-		elseif ($params->get('gh_user', '') && $params->get('gh_password'))
-		{
-			$options->set('api.username', $params->get('gh_user', ''));
-			$options->set('api.password', $params->get('gh_password', ''));
-		}
 		// Display a message about the lowered API limit without credentials
 		else
 		{

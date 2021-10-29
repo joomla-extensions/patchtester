@@ -9,9 +9,9 @@ rm -rf build/packaging/admin/backups/*.txt
 mv build/packaging/admin/patchtester.xml build/packaging/patchtester.xml
 mv build/packaging/admin/script.php build/packaging/script.php
 cd build/packaging
-tar jcf ../packages/com_patchtester.tar.bz2 .
-tar zcf ../packages/com_patchtester.tar.gz .
-zip -r ../packages/com_patchtester.zip .
+tar jcf ../packages/com_patchtester_"$1".tar.bz2 .
+tar zcf ../packages/com_patchtester_"$1".tar.gz .
+zip -r ../packages/com_patchtester_"$1".zip .
 cd ../../
 composer install
 php build/patchtester/hash_generator.php

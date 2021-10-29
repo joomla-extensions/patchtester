@@ -1,8 +1,0 @@
-base_path: /administrator/components/com_patchtester/language
-files:
-  - source: /en-GB/com_patchtester.ini
-    translation: /%locale%/com_patchtester.ini
-    update_option: update_as_unapproved
-  - source: /en-GB/com_patchtester.sys.ini
-    translation: /%locale%/com_patchtester.sys.ini
-    update_option: update_as_unapproved

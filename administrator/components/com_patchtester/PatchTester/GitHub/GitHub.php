@@ -52,61 +52,6 @@ class GitHub
 	}
 
 	/**
-	 * Build and return a full request URL.
-	 *
-	 * This method will add appropriate pagination details and basic authentication credentials if necessary
-	 * and also prepend the API url to have a complete URL for the request.
-	 *
-	 * @param   string   $path   URL to inflect
-	 * @param   integer  $page   Page to request
-	 * @param   integer  $limit  Number of results to return per page
-	 *
-	 * @return  string   The request URL.
-	 *
-	 * @since   3.0.0
-	 */
-	protected function fetchUrl($path, $page = 0, $limit = 0)
-	{
-		// Get a new Uri object using the API URL and given path.
-		$uri = new Uri($this->options->get('api.url') . $path);
-
-		// Only apply basic authentication if an access token is not set
-		if ($this->options->get('gh.token', false) === false)
-		{
-			// Use basic authentication
-			if ($this->options->get('api.username', false))
-			{
-				$username = $this->options->get('api.username');
-				$username = str_replace('@', '%40', $username);
-				$username = str_replace('#', '%23', $username);
-				$uri->setUser($username);
-			}
-
-			if ($this->options->get('api.password', false))
-			{
-				$password = $this->options->get('api.password');
-				$password = str_replace('@', '%40', $password);
-				$password = str_replace('#', '%23', $password);
-				$uri->setPass($password);
-			}
-		}
-
-		// If we have a defined page number add it to the JUri object.
-		if ($page > 0)
-		{
-			$uri->setVar('page', (int) $page);
-		}
-
-		// If we have a defined items per page add it to the JUri object.
-		if ($limit > 0)
-		{
-			$uri->setVar('per_page', (int) $limit);
-		}
-
-		return (string) $uri;
-	}
-
-	/**
 	 * Get the HTTP client for this connector.
 	 *
 	 * @return  Http
@@ -139,7 +84,99 @@ class GitHub
 
 		$prepared = $this->prepareRequest($path, 0, 0, $headers);
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
+	}
+
+	/**
+	 * Method to build and return a full request URL for the request.
+	 *
+	 * This method will add appropriate pagination details if necessary and also prepend the API url to have a complete URL for the request.
+	 *
+	 * @param   string   $path     Path to process
+	 * @param   integer  $page     Page to request
+	 * @param   integer  $limit    Number of results to return per page
+	 * @param   array    $headers  The headers to send with the request
+	 *
+	 * @return  array  Associative array containing the prepared URL and request headers
+	 *
+	 * @since   3.0.0
+	 */
+	protected function prepareRequest($path, $page = 0, $limit = 0,
+		array $headers = array()
+	) {
+		$url = $this->fetchUrl($path, $page, $limit);
+
+		if ($token = $this->options->get('gh.token', false))
+		{
+			$headers['Authorization'] = "token $token";
+		}
+
+		return array('url' => $url, 'headers' => $headers);
+	}
+
+	/**
+	 * Build and return a full request URL.
+	 *
+	 * This method will add appropriate pagination details and basic authentication credentials if necessary
+	 * and also prepend the API url to have a complete URL for the request.
+	 *
+	 * @param   string   $path   URL to inflect
+	 * @param   integer  $page   Page to request
+	 * @param   integer  $limit  Number of results to return per page
+	 *
+	 * @return  string   The request URL.
+	 *
+	 * @since   3.0.0
+	 */
+	protected function fetchUrl($path, $page = 0, $limit = 0)
+	{
+		// Get a new Uri object using the API URL and given path.
+		$uri = new Uri($this->options->get('api.url') . $path);
+
+		// If we have a defined page number add it to the JUri object.
+		if ($page > 0)
+		{
+			$uri->setVar('page', (int) $page);
+		}
+
+		// If we have a defined items per page add it to the JUri object.
+		if ($limit > 0)
+		{
+			$uri->setVar('per_page', (int) $limit);
+		}
+
+		return (string) $uri;
+	}
+
+	/**
+	 * Process the response and return it.
+	 *
+	 * @param   Response  $response      The response.
+	 * @param   integer   $expectedCode  The expected response code.
+	 *
+	 * @return  Response
+	 *
+	 * @since   3.0.0
+	 * @throws  Exception\UnexpectedResponse
+	 */
+	protected function processResponse(Response $response, $expectedCode = 200)
+	{
+		// Validate the response code.
+		if ($response->code != $expectedCode)
+		{
+			// Decode the error response and throw an exception.
+			$body  = json_decode($response->body);
+			$error = isset($body->error) ? $body->error
+				: (isset($body->message) ? $body->message : 'Unknown Error');
+
+			throw new Exception\UnexpectedResponse(
+				$response, $error, $response->code
+			);
+		}
+
+		return $response;
 	}
 
 	/**
@@ -168,7 +205,9 @@ class GitHub
 			$prepared['url'] = (string) $url;
 		}
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
 	}
 
 	/**
@@ -189,7 +228,9 @@ class GitHub
 
 		$prepared = $this->prepareRequest($path);
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
 	}
 
 	/**
@@ -206,9 +247,36 @@ class GitHub
 	 */
 	public function getOpenIssues($user, $repo, $page = 0, $limit = 0)
 	{
-		$prepared = $this->prepareRequest("/repos/$user/$repo/issues", $page, $limit);
+		$prepared = $this->prepareRequest(
+			"/repos/$user/$repo/issues", $page, $limit
+		);
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
+	}
+
+	/**
+	 * Get a list of the open pull requests for a repository.
+	 *
+	 * @param   string   $user   The name of the owner of the GitHub repository.
+	 * @param   string   $repo   The name of the GitHub repository.
+	 * @param   integer  $page   The page number from which to get items.
+	 * @param   integer  $limit  The number of items on a page.
+	 *
+	 * @return  Response
+	 *
+	 * @since   3.0.0
+	 */
+	public function getOpenPulls($user, $repo, $page = 0, $limit = 0)
+	{
+		$prepared = $this->prepareRequest(
+			"/repos/$user/$repo/pulls", $page, $limit
+		);
+
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
 	}
 
 	/**
@@ -244,7 +312,9 @@ class GitHub
 
 		$prepared = $this->prepareRequest($path);
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
 	}
 
 	/**
@@ -258,59 +328,9 @@ class GitHub
 	{
 		$prepared = $this->prepareRequest('/rate_limit');
 
-		return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
-	}
-
-	/**
-	 * Process the response and return it.
-	 *
-	 * @param   Response  $response      The response.
-	 * @param   integer   $expectedCode  The expected response code.
-	 *
-	 * @return  Response
-	 *
-	 * @since   3.0.0
-	 * @throws  Exception\UnexpectedResponse
-	 */
-	protected function processResponse(Response $response, $expectedCode = 200)
-	{
-		// Validate the response code.
-		if ($response->code != $expectedCode)
-		{
-			// Decode the error response and throw an exception.
-			$body  = json_decode($response->body);
-			$error = isset($body->error) ? $body->error : (isset($body->message) ? $body->message : 'Unknown Error');
-
-			throw new Exception\UnexpectedResponse($response, $error, $response->code);
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Method to build and return a full request URL for the request.
-	 *
-	 * This method will add appropriate pagination details if necessary and also prepend the API url to have a complete URL for the request.
-	 *
-	 * @param   string   $path     Path to process
-	 * @param   integer  $page     Page to request
-	 * @param   integer  $limit    Number of results to return per page
-	 * @param   array    $headers  The headers to send with the request
-	 *
-	 * @return  array  Associative array containing the prepared URL and request headers
-	 *
-	 * @since   3.0.0
-	 */
-	protected function prepareRequest($path, $page = 0, $limit = 0, array $headers = array())
-	{
-		$url = $this->fetchUrl($path, $page, $limit);
-
-		if ($token = $this->options->get('gh.token', false))
-		{
-			$headers['Authorization'] = "token $token";
-		}
-
-		return array('url' => $url, 'headers' => $headers);
+		return $this->processResponse(
+			$this->client->get($prepared['url'], $prepared['headers'])
+		);
 	}
 
 	/**

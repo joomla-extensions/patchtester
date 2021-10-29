@@ -90,7 +90,7 @@ if (typeof Joomla === 'undefined') {
                             getRequest('fetch');
                         } else {
                             jQuery('#progress').remove();
-                            jQuery('#modal-sync  button.close', window.parent.document).trigger('click');
+                            jQuery('#modal-sync  button.btn-close', window.parent.document).trigger('click');
                         }
                     } catch (error) {
                         try {

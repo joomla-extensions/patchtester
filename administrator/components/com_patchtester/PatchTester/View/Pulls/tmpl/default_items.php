@@ -29,13 +29,13 @@ foreach ($this->items as $i => $item) :
 			</div>
 			<div class="row">
 				<div class="col-md-auto">
-					<a class="badge badge-info" href="<?php echo $item->pull_url; ?>" target="_blank">
+					<a class="badge bg-info" href="<?php echo $item->pull_url; ?>" target="_blank">
 						<?php echo Text::_('COM_PATCHTESTER_VIEW_ON_GITHUB'); ?>
 					</a>
 				</div>
 				<?php if ($this->trackerAlias) : ?>
 				<div class="col-md-auto">
-					<a class="badge badge-info"
+					<a class="badge bg-info"
 					   href="https://issues.joomla.org/tracker/<?php echo $this->trackerAlias; ?>/<?php echo $item->pull_id; ?>"
 					   target="_blank">
 						<?php echo Text::_('COM_PATCHTESTER_VIEW_ON_JOOMLA_ISSUE_TRACKER'); ?>
@@ -44,7 +44,7 @@ foreach ($this->items as $i => $item) :
 				<?php endif; ?>
 				<?php if ($item->applied) : ?>
 					<div class="col-md-auto">
-						<span class="badge badge-info"><?php echo Text::sprintf('COM_PATCHTESTER_APPLIED_COMMIT_SHA', substr($item->sha, 0, 10)); ?></span>
+						<span class="badge bg-info"><?php echo Text::sprintf('COM_PATCHTESTER_APPLIED_COMMIT_SHA', substr($item->sha, 0, 10)); ?></span>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -92,16 +92,16 @@ foreach ($this->items as $i => $item) :
 		</td>
 		<td class="d-none d-md-table-cell text-center">
 			<?php if ($item->is_rtc) : ?>
-				<span class="badge badge-success"><?php echo Text::_('JYES'); ?></span>
+				<span class="badge bg-success"><?php echo Text::_('JYES'); ?></span>
 			<?php else : ?>
-				<span class="badge badge-secondary"><?php echo Text::_('JNO'); ?></span>
+				<span class="badge bg-secondary"><?php echo Text::_('JNO'); ?></span>
 			<?php endif; ?>
 		</td>
 		<td class="text-center">
 			<?php if ($item->applied) : ?>
-				<span class="badge badge-success"><?php echo Text::_('COM_PATCHTESTER_APPLIED'); ?></span>
+				<span class="badge bg-success"><?php echo Text::_('COM_PATCHTESTER_APPLIED'); ?></span>
 			<?php else : ?>
-				<span class="badge badge-secondary"><?php echo Text::_('COM_PATCHTESTER_NOT_APPLIED'); ?></span>
+				<span class="badge bg-secondary"><?php echo Text::_('COM_PATCHTESTER_NOT_APPLIED'); ?></span>
 			<?php endif; ?>
 		</td>
 		<td class="text-center">
