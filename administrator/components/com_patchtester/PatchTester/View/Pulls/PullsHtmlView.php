@@ -9,7 +9,6 @@
 namespace PatchTester\View\Pulls;
 
 use Exception;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Pagination\Pagination;
@@ -126,11 +125,6 @@ class PullsHtmlView extends DefaultHtmlView
 		$this->addToolbar();
 
 		Text::script('COM_PATCHTESTER_CONFIRM_RESET');
-
-		if (version_compare(JVERSION, '4.0', 'ge'))
-		{
-			Factory::getApplication()->enqueueMessage(Text::_('COM_PATCHTESTER_40_WARNING'), 'warning');
-		}
 
 		return parent::render();
 	}

@@ -14,10 +14,11 @@
 				type="list"
 				default=""
 				validate="options"
+				onchange="this.form.submit();"
 		>
 			<option value="">COM_PATCHTESTER_FILTER_APPLIED_PATCHES</option>
-			<option value="0">JNO</option>
 			<option value="1">JYES</option>
+			<option value="0">JNO</option>
 		</field>
 
 
@@ -26,10 +27,11 @@
 				type="list"
 				default=""
 				validate="options"
+				onchange="this.form.submit();"
 		>
 			<option value="">COM_PATCHTESTER_FILTER_RTC_PATCHES</option>
-			<option value="0">JNO</option>
 			<option value="1">JYES</option>
+			<option value="0">JNO</option>
 		</field>
 
 		<field
@@ -37,10 +39,11 @@
 				type="list"
 				default=""
 				validate="options"
+				onchange="this.form.submit();"
 		>
 			<option value="">COM_PATCHTESTER_FILTER_NPM_PATCHES</option>
-			<option value="0">JNO</option>
 			<option value="1">JYES</option>
+			<option value="0">JNO</option>
 		</field>
 
 		<field

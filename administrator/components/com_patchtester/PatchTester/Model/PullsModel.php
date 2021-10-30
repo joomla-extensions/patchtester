@@ -247,7 +247,7 @@ class PullsModel extends ListModel
 		if (!empty($branch))
 		{
 			$query->where(
-				$db->quoteName('pulls.branch') . ' = ' . $db->quote($branch)
+				$db->quoteName('pulls.branch') . ' IN (' . implode(',', $db->quote($branch)) . ')'
 			);
 		}
 
