@@ -187,7 +187,6 @@ class PullsModel extends ListModel
 	 */
 	protected function getListQuery()
 	{
-		// Create a new query object.
 		$db         = $this->getDbo();
 		$query      = $db->getQuery(true);
 		$labelQuery = $db->getQuery(true);
@@ -201,7 +200,6 @@ class PullsModel extends ListModel
 				. $db->quoteName('pulls.pull_id')
 			);
 
-		// Filter by search
 		$search = $this->getState()->get('filter.search');
 
 		if (!empty($search))
@@ -230,7 +228,6 @@ class PullsModel extends ListModel
 			}
 		}
 
-		// Filter for applied patches
 		$applied = $this->getState()->get('filter.applied');
 
 		if (!empty($applied))
@@ -241,7 +238,6 @@ class PullsModel extends ListModel
 			$query->where($db->quoteName('applied') . $value);
 		}
 
-		// Filter for branch
 		$branch = $this->getState()->get('filter.branch');
 
 		if (!empty($branch))
@@ -251,7 +247,6 @@ class PullsModel extends ListModel
 			);
 		}
 
-		// Filter for RTC patches
 		$applied = $this->getState()->get('filter.rtc');
 
 		if (!empty($applied))
@@ -262,7 +257,6 @@ class PullsModel extends ListModel
 			$query->where($db->quoteName('pulls.is_rtc') . ' = ' . $value);
 		}
 
-		// Filter for NPM patches
 		$npm = $this->getState()->get('filter.npm');
 
 		if (!empty($npm))
@@ -346,7 +340,6 @@ class PullsModel extends ListModel
 	 */
 	public function requestFromGithub($page)
 	{
-		// If on page 1, dump the old data
 		if ($page === 1)
 		{
 			$this->getDbo()->truncateTable('#__patchtester_pulls');
@@ -385,9 +378,9 @@ class PullsModel extends ListModel
 			// Default this to being a single page of results
 			$lastPage = 1;
 
-			if (isset($pullsResponse->headers['Link']))
+			if (isset($pullsResponse->headers['link']))
 			{
-				$linkHeader = $pullsResponse->headers['Link'];
+				$linkHeader = $pullsResponse->headers['link'];
 
 				// The `joomla/http` 2.0 package uses PSR-7 Responses which has a different format for headers, check for this
 				if (is_array($linkHeader))
