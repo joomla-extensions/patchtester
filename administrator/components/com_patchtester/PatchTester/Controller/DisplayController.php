@@ -76,7 +76,12 @@ class DisplayController extends AbstractController
 		$model = new $modelClass($this->context, null, Factory::getDbo());
 
 		// Initialize the state for the model
-		$model->setState($this->initializeState($model));
+		$state = $this->initializeState($model);
+
+		foreach ($state as $key => $value)
+		{
+			$model->setState($key, $value);
+		}
 
 		// Initialize the view class now
 		$view = new $viewClass($model, $paths);
