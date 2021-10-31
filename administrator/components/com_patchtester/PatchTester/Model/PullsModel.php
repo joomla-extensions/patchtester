@@ -57,6 +57,7 @@ class PullsModel extends ListModel
 				'applied',
 				'rtc',
 				'npm',
+				'draft',
 				'label',
 				'branch',
 			];
@@ -267,6 +268,16 @@ class PullsModel extends ListModel
 			$query->where($db->quoteName('pulls.is_npm') . ' = ' . $value);
 		}
 
+		$draft = $this->getState()->get('filter.draft');
+
+		if (!empty($draft))
+		{
+			// Not applied patches have a NULL value, so build our value part of the query based on this
+			$value = $draft === 'no' ? '0' : '1';
+
+			$query->where($db->quoteName('pulls.is_draft') . ' = ' . $value);
+		}
+
 		$labels = $this->getState()->get('filter.label');
 
 		if (!empty($labels) && $labels[0] !== '')
@@ -351,7 +362,7 @@ class PullsModel extends ListModel
 			// TODO - Option to configure the batch size
 			$batchSize = 100;
 
-			$pullsResponse = Helper::initializeGithub()->getOpenIssues(
+			$pullsResponse = Helper::initializeGithub()->getOpenPulls(
 				$this->getState()->get('github_user'),
 				$this->getState()->get('github_repo'),
 				$page,
@@ -416,59 +427,54 @@ class PullsModel extends ListModel
 
 		foreach ($pulls as $pull)
 		{
-			if (isset($pull->pull_request))
+			// Check if this PR is RTC and has a `PR-` branch label
+			$isRTC  = false;
+			$isNPM  = false;
+			$branch = $pull->base->ref;
+
+			foreach ($pull->labels as $label)
 			{
-				// Check if this PR is RTC and has a `PR-` branch label
-				$isRTC  = false;
-				$isNPM  = false;
-				$branch = '';
-
-				foreach ($pull->labels as $label)
+				if (strtolower($label->name) === 'rtc')
 				{
-					if (strtolower($label->name) === 'rtc')
-					{
-						$isRTC = true;
-					}
-					elseif (strpos($label->name, 'PR-') === 0)
-					{
-						$branch = substr($label->name, 3);
-					}
-					elseif (in_array(
-						strtolower($label->name),
-						['npm resource changed', 'composer dependency changed'],
-						true
-					))
-					{
-						$isNPM = true;
-					}
-
-					$labels[] = implode(
-						',',
-						[
-							(int) $pull->number,
-							$this->getDbo()->quote($label->name),
-							$this->getDbo()->quote($label->color),
-						]
-					);
+					$isRTC = true;
+				}
+				elseif (in_array(
+					strtolower($label->name),
+					['npm resource changed', 'composer dependency changed'],
+					true
+				))
+				{
+					$isNPM = true;
 				}
 
-				// Build the data object to store in the database
-				$pullData = [
-					(int) $pull->number,
-					$this->getDbo()->quote(
-						HTMLHelper::_('string.truncate', $pull->title, 150)
-					),
-					$this->getDbo()->quote(
-						HTMLHelper::_('string.truncate', $pull->body, 100)
-					),
-					$this->getDbo()->quote($pull->pull_request->html_url),
-					(int) $isRTC,
-					(int) $isNPM,
-					$this->getDbo()->quote($branch),
-				];
-
-				$data[] = implode(',', $pullData);
+				$labels[] = implode(
+					',',
+					[
+						(int) $pull->number,
+						$this->getDbo()->quote($label->name),
+						$this->getDbo()->quote($label->color),
+					]
+				);
 			}
+
+			// Build the data object to store in the database
+			$pullData = [
+				(int) $pull->number,
+				$this->getDbo()->quote(
+					HTMLHelper::_('string.truncate', $pull->title, 150)
+				),
+				$this->getDbo()->quote(
+					HTMLHelper::_('string.truncate', $pull->body, 100)
+				),
+				$this->getDbo()->quote($pull->html_url),
+				(int) $isRTC,
+				(int) $isNPM,
+				$this->getDbo()->quote($branch),
+				($pull->draft ? 1 : 0)
+			];
+
+			$data[] = implode(',', $pullData);
+
 		}
 
 		// If there are no pulls to insert then bail, assume we're finished
@@ -484,7 +490,7 @@ class PullsModel extends ListModel
 					->insert('#__patchtester_pulls')
 					->columns(
 						['pull_id', 'title', 'description', 'pull_url',
-						 'is_rtc', 'is_npm', 'branch']
+						 'is_rtc', 'is_npm', 'branch', 'is_draft']
 					)
 					->values($data)
 			);

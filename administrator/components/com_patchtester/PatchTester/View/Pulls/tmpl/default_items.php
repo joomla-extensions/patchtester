@@ -21,6 +21,11 @@ foreach ($this->items as $i => $item) :
 	<tr<?php echo $status; ?>>
 		<th scope="row" class="text-center">
 			<?php echo $item->pull_id; ?>
+			<?php if ($item->is_draft) : ?>
+				<span class="badge" style="color: #FFFFFF; background-color: #6e7681">
+					<?php echo Text::_('COM_PATCHTESTER_IS_DRAFT'); ?>
+				</span>
+			<?php endif; ?>
 		</th>
 		<td>
 			<span><?php echo $this->escape($item->title); ?></span>

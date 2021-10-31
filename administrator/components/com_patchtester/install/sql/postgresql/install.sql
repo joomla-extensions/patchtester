@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "#__patchtester_pulls"
     "is_rtc"      smallint               DEFAULT 1  NOT NULL,
     "is_npm"      smallint               DEFAULT 1  NOT NULL,
     "branch"      character varying(255) DEFAULT '' NOT NULL,
+    "is_draft"    smallint               DEFAULT 0  NOT NULL,
     PRIMARY KEY ("id")
 );
 

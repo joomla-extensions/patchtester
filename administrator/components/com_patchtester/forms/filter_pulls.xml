@@ -47,6 +47,18 @@
 		</field>
 
 		<field
+				name="draft"
+				type="list"
+				default=""
+				validate="options"
+				onchange="this.form.submit();"
+		>
+			<option value="">COM_PATCHTESTER_FILTER_DRAFT_PATCHES</option>
+			<option value="1">JYES</option>
+			<option value="0">JNO</option>
+		</field>
+
+		<field
 				name="label"
 				type="Label"
 				layout="joomla.form.field.list-fancy-select"

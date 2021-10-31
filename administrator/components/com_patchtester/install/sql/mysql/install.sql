@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `#__patchtester_pulls`
     `is_rtc`      tinyint(1)                              NOT NULL DEFAULT 0,
     `is_npm`      tinyint(1)                                       DEFAULT 0,
     `branch`      varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+    `is_draft`    tinyint(1) unsigned                              DEFAULT 0 COMMENT 'If the pull request is a draft PR',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
