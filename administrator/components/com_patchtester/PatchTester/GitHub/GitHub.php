@@ -221,10 +221,10 @@ class GitHub
 	 *
 	 * @since   3.0.0
 	 */
-	public function getFilesForPullRequest($user, $repo, $pullId)
+	public function getFilesForPullRequest($user, $repo, $pullId, $page = 1)
 	{
 		// Build the request path.
-		$path = "/repos/$user/$repo/pulls/" . (int) $pullId . '/files';
+		$path = "/repos/$user/$repo/pulls/" . (int) $pullId . '/files?page=' . $page;
 
 		$prepared = $this->prepareRequest($path);
 

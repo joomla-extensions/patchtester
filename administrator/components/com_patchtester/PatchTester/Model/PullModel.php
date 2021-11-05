@@ -37,13 +37,14 @@ class PullModel extends AbstractModel
 	 * @var    array
 	 * @since  2.0
 	 */
-	protected $nonProductionFolders = array(
-		'build',
-		'docs',
-		'installation',
-		'tests',
-		'.github',
-	);
+	protected $nonProductionFolders
+		= array(
+			'build',
+			'docs',
+			'installation',
+			'tests',
+			'.github',
+		);
 
 	/**
 	 * Array containing non-production files
@@ -51,26 +52,27 @@ class PullModel extends AbstractModel
 	 * @var    array
 	 * @since  2.0
 	 */
-	protected $nonProductionFiles = array(
-		'.drone.yml',
-		'.gitignore',
-		'.php_cs',
-		'.travis.yml',
-		'README.md',
-		'build.xml',
-		'composer.json',
-		'composer.lock',
-		'phpunit.xml.dist',
-		'robots.txt.dist',
-		'travisci-phpunit.xml',
-		'LICENSE',
-		'RoboFile.dist.ini',
-		'RoboFile.php',
-		'codeception.yml',
-		'jorobo.dist.ini',
-		'manifest.xml',
-		'crowdin.yaml',
-	);
+	protected $nonProductionFiles
+		= array(
+			'.drone.yml',
+			'.gitignore',
+			'.php_cs',
+			'.travis.yml',
+			'README.md',
+			'build.xml',
+			'composer.json',
+			'composer.lock',
+			'phpunit.xml.dist',
+			'robots.txt.dist',
+			'travisci-phpunit.xml',
+			'LICENSE',
+			'RoboFile.dist.ini',
+			'RoboFile.php',
+			'codeception.yml',
+			'jorobo.dist.ini',
+			'manifest.xml',
+			'crowdin.yaml',
+		);
 
 	/**
 	 * The namespace mapper
@@ -522,7 +524,6 @@ class PullModel extends AbstractModel
 	 */
 	private function applyWithGitHub(int $id): bool
 	{
-		// Get the Github object
 		$github = Helper::initializeGithub();
 
 		$pull = $this->retrieveGitHubData($github, $id);
@@ -534,12 +535,7 @@ class PullModel extends AbstractModel
 
 		try
 		{
-			$filesResponse = $github->getFilesForPullRequest(
-				$this->getState()->get('github_user'),
-				$this->getState()->get('github_repo'),
-				$id
-			);
-			$files         = json_decode($filesResponse->body, false);
+			$files = $this->getFiles($id, 1);
 		}
 		catch (UnexpectedResponse $exception)
 		{
@@ -634,7 +630,7 @@ class PullModel extends AbstractModel
 			// We only create a backup if the file already exists
 			if ($file->action === 'deleted'
 				|| (file_exists(JPATH_ROOT . '/' . $file->filename)
-				&& $file->action === 'modified')
+					&& $file->action === 'modified')
 				|| (file_exists(JPATH_ROOT . '/' . $file->originalFile) && $file->action === 'renamed'))
 			{
 				$filename = $file->action === 'renamed' ? $file->originalFile : $file->filename;
@@ -708,6 +704,49 @@ class PullModel extends AbstractModel
 		$version->refreshMediaVersion();
 
 		return true;
+	}
+
+	/**
+	 * Get all files from Github.
+	 *
+	 * @param   int    $id     The pull ID
+	 * @param   int    $page   THhe page umber to process
+	 * @param   array  $files  The list of files retrieved from Github
+	 *
+	 * @return  array  LIst of files to process.
+	 *
+	 * @since   4.2.0
+	 */
+	private function getFiles(int $id, int $page, array $files = []): array
+	{
+		$github = Helper::initializeGithub();
+
+		$filesResponse = $github->getFilesForPullRequest(
+			$this->getState()->get('github_user'),
+			$this->getState()->get('github_repo'),
+			$id,
+			$page
+		);
+
+		$files    = array_merge($files, json_decode($filesResponse->getBody(), false));
+		$lastPage = 1;
+
+		preg_match(
+			'/(\?page=[0-9]{1,3}>; rel=\"last\")/', $filesResponse->getHeaders()['link'][0], $matches
+		);
+
+		if ($matches && isset($matches[0]))
+		{
+			preg_match('/\d+/', $matches[0], $pages);
+			$lastPage = (int) $pages[0];
+		}
+
+		if ($page <= $lastPage)
+		{
+			$files = $this->getFiles($id, ++$page, $files);
+		}
+
+		return $files;
 	}
 
 	/**
