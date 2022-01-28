@@ -41,11 +41,11 @@
 		<type>component</type>
 		<version>4.1.0</version>
 		<client>administrator</client>
-		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.1.0</infourl>
+		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.2.0</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.1.0/com_patchtester_4.1.0.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.2.0/com_patchtester_4.2.0.zip</downloadurl>
 		</downloads>
-		<sha384>92a8627f90ddaf6efa573162774c82f7bc5628b3a4ee5862e651662e6e5b3c6d6c948793732cdd15d8c850768e3491ab</sha384>
+		<sha384>a4a4cc21051b8e6ca367eaa9c68553ea253ccce1be6db9c71c49a5ae0b57fbd389638dd827fd21aa169959a95c345fd1</sha384>
 		<tags>
 			<tag>stable</tag>
 		</tags>
