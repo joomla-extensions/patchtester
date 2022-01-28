@@ -474,7 +474,6 @@ class PullsModel extends ListModel
 			];
 
 			$data[] = implode(',', $pullData);
-
 		}
 
 		// If there are no pulls to insert then bail, assume we're finished

@@ -629,8 +629,7 @@ class PullModel extends AbstractModel
 		{
 			// We only create a backup if the file already exists
 			if ($file->action === 'deleted'
-				|| (file_exists(JPATH_ROOT . '/' . $file->filename)
-					&& $file->action === 'modified')
+				|| (file_exists(JPATH_ROOT . '/' . $file->filename) && $file->action === 'modified')
 				|| (file_exists(JPATH_ROOT . '/' . $file->originalFile) && $file->action === 'renamed'))
 			{
 				$filename = $file->action === 'renamed' ? $file->originalFile : $file->filename;
