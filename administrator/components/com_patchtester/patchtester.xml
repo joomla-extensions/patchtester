@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later</license>
 	<authorEmail>admin@joomla.org</authorEmail>
 	<authorUrl>https://www.joomla.org</authorUrl>
-	<version>4.2.0</version>
+	<version>4.2.1</version>
 	<description>COM_PATCHTESTER_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<install>
@@ -40,10 +40,11 @@
 	<administration>
 		<menu img="../media/com_patchtester/images/icon-16-patchtester.png">com_patchtester</menu>
 		<files folder="admin">
-			<folder>PatchTester</folder>
 			<folder>backups</folder>
+			<folder>forms</folder>
 			<folder>install</folder>
 			<folder>language</folder>
+			<folder>PatchTester</folder>
 			<folder>vendor</folder>
 			<filename>access.xml</filename>
 			<filename>config.xml</filename>
