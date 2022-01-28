@@ -39,7 +39,7 @@
 		<description>Joomla! CMS Patch Tester Component</description>
 		<element>com_patchtester</element>
 		<type>component</type>
-		<version>4.1.0</version>
+		<version>4.2.0</version>
 		<client>administrator</client>
 		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.2.0</infourl>
 		<downloads>
