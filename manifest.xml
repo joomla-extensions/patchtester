@@ -45,7 +45,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.2.1/com_patchtester_4.2.1.zip</downloadurl>
 		</downloads>
-		<sha384>9cacfcb73c1caad8ad22966ea2ed8243a0fb8f82de5c427ec38b73e0faa71c77db36dea483988ed01fef658635b88f18</sha384>
+		<sha384>5003173ae55ba0b04b49087a58107626eb228a5f5b16b7272e77c67f472208098e668350f5eb68210cabec7d7c28a7cb</sha384>
 		<tags>
 			<tag>stable</tag>
 		</tags>
