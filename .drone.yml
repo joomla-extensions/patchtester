@@ -18,7 +18,7 @@ steps:
     image: joomlaprojects/docker-images:php7.2
     commands:
       - echo $(date)
-      - ./administrator/components/com_patchtester/vendor/bin/phpcs --extensions=php -p --ignore=administrator/components/com_patchtester/vendor --ignore=build/packaging --standard=PSR12 .
+      - ./administrator/components/com_patchtester/vendor/bin/phpcs --extensions=php -p --standard=ruleset.xml .
       - echo $(date)
 
 volumes:
@@ -27,6 +27,6 @@ volumes:
       path: /tmp/composer-cache
 ---
 kind: signature
-hmac: 66f585c17b678699c15f48673fa52585c02eddab99c4dcfa2f1e1e85960a2a31
+hmac: 6894a15e535673bd3eb1cf2c8ee3f9cbac4b5a6e52aa26773add3e4943f3bd86
 
 ...
