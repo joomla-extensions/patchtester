@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -17,37 +18,36 @@ use PatchTester\Model\AbstractModel;
  */
 abstract class AbstractView
 {
-	/**
-	 * The model object.
-	 *
-	 * @var    AbstractModel
-	 * @since  4.0.0
-	 */
-	protected $model;
+    /**
+     * The model object.
+     *
+     * @var    AbstractModel
+     * @since  4.0.0
+     */
+    protected $model;
+/**
+     * Method to instantiate the view.
+     *
+     * @param   AbstractModel  $model  The model object.
+     *
+     * @since   4.0.0
+     */
+    public function __construct($model)
+    {
+        $this->model = $model;
+    }
 
-	/**
-	 * Method to instantiate the view.
-	 *
-	 * @param   AbstractModel  $model  The model object.
-	 *
-	 * @since   4.0.0
-	 */
-	public function __construct($model)
-	{
-		$this->model = $model;
-	}
-
-	/**
-	 * Method to escape output.
-	 *
-	 * @param   string  $output  The output to escape.
-	 *
-	 * @return  string  The escaped output.
-	 *
-	 * @since   4.0.0
-	 */
-	public function escape($output)
-	{
-		return $output;
-	}
+    /**
+     * Method to escape output.
+     *
+     * @param   string  $output  The output to escape.
+     *
+     * @return  string  The escaped output.
+     *
+     * @since   4.0.0
+     */
+    public function escape($output)
+    {
+        return $output;
+    }
 }

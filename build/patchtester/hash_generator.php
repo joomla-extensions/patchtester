@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 /**
  * Script used to generate hashes for release packages
  *
@@ -14,16 +15,14 @@ $packageDir = dirname(__DIR__) . '/packages';
 $hashes = array();
 
 /** @var DirectoryIterator $file */
-foreach (new DirectoryIterator($packageDir) as $file)
-{
-	if ($file->isDir() || $file->isDot())
-	{
-		continue;
-	}
+foreach (new DirectoryIterator($packageDir) as $file) {
+    if ($file->isDir() || $file->isDot()) {
+        continue;
+    }
 
-	$hashes[$file->getFilename()] = array(
-		'sha384' => hash_file('sha384', $file->getPathname()),
-	);
+    $hashes[$file->getFilename()] = array(
+        'sha384' => hash_file('sha384', $file->getPathname()),
+    );
 }
 
 $jsonOptions = PHP_VERSION_ID >= 50400 ? JSON_PRETTY_PRINT : 0;

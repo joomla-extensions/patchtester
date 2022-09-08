@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -17,40 +18,38 @@ use Joomla\CMS\Http\Response;
  */
 class UnexpectedResponse extends \DomainException
 {
-	/**
-	 * The Response object.
-	 *
-	 * @var    Response
-	 * @since  3.0.0
-	 */
-	private $response;
+    /**
+     * The Response object.
+     *
+     * @var    Response
+     * @since  3.0.0
+     */
+    private $response;
+/**
+     * Constructor
+     *
+     * @param   Response    $response  The Response object.
+     * @param   string      $message   The Exception message to throw.
+     * @param   integer     $code      The Exception code.
+     * @param   \Exception  $previous  The previous exception used for the exception chaining.
+     *
+     * @since   3.0.0
+     */
+    public function __construct(Response $response, $message = '', $code = 0, \Exception $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->response = $response;
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param   Response    $response  The Response object.
-	 * @param   string      $message   The Exception message to throw.
-	 * @param   integer     $code      The Exception code.
-	 * @param   \Exception  $previous  The previous exception used for the exception chaining.
-	 *
-	 * @since   3.0.0
-	 */
-	public function __construct(Response $response, $message = '', $code = 0, \Exception $previous = null)
-	{
-		parent::__construct($message, $code, $previous);
-
-		$this->response = $response;
-	}
-
-	/**
-	 * Get the Response object.
-	 *
-	 * @return  Response
-	 *
-	 * @since   3.0.0
-	 */
-	public function getResponse()
-	{
-		return $this->response;
-	}
+    /**
+     * Get the Response object.
+     *
+     * @return  Response
+     *
+     * @since   3.0.0
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
 }

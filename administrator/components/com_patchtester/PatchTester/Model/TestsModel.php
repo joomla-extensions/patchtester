@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -8,6 +9,10 @@
 
 namespace PatchTester\Model;
 
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
 /**
  * Methods supporting applied pull requests.
  *
@@ -15,36 +20,32 @@ namespace PatchTester\Model;
  */
 class TestsModel extends AbstractModel
 {
-	/**
-	 * Retrieves a list of applied patches
-	 *
-	 * @return  array List of applied patches
-	 *
-	 * @since   2.0
-	 */
-	public function getAppliedPatches(): array
-	{
-		$db = $this->getDb();
+    /**
+     * Retrieves a list of applied patches
+     *
+     * @return  array List of applied patches
+     *
+     * @since   2.0
+     */
+    public function getAppliedPatches(): array
+    {
+        $db = $this->getDb();
+        $db->setQuery($db->getQuery(true)
+                ->select('*')
+                ->from($db->quoteName('#__patchtester_tests'))
+                ->where($db->quoteName('applied') . ' = 1'));
+        return $db->loadObjectList('pull_id');
+    }
 
-		$db->setQuery(
-			$db->getQuery(true)
-				->select('*')
-				->from($db->quoteName('#__patchtester_tests'))
-				->where($db->quoteName('applied') . ' = 1')
-		);
-
-		return $db->loadObjectList('pull_id');
-	}
-
-	/**
-	 * Truncates the tests table
-	 *
-	 * @return  void
-	 *
-	 * @since   2.0
-	 */
-	public function truncateTable(): void
-	{
-		$this->getDb()->truncateTable('#__patchtester_tests');
-	}
+    /**
+     * Truncates the tests table
+     *
+     * @return  void
+     *
+     * @since   2.0
+     */
+    public function truncateTable(): void
+    {
+        $this->getDb()->truncateTable('#__patchtester_tests');
+    }
 }
