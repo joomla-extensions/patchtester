@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -15,55 +16,53 @@ namespace PatchTester;
  */
 abstract class TrackerHelper
 {
-	/**
-	 * Array containing the supported repositories integrated with the Joomla! Issue Tracker
-	 *
-	 * @var    array
-	 * @since  2.0
-	 */
-	private static $projects = array(
-		'joomla-cms'  => array(
-			'githubUser'   => 'joomla',
-			'githubrepo'   => 'joomla-cms',
-			'projectAlias' => 'joomla-cms',
-		),
-		'patchtester' => array(
-			'githubUser'   => 'joomla-extensions',
-			'githubrepo'   => 'patchtester',
-			'projectAlias' => 'patchtester',
-		),
-		'weblinks'    => array(
-			'githubUser'   => 'joomla-extensions',
-			'githubrepo'   => 'weblinks',
-			'projectAlias' => 'weblinks',
-		),
-	);
+    /**
+     * Array containing the supported repositories integrated with the Joomla! Issue Tracker
+     *
+     * @var    array
+     * @since  2.0
+     */
+    private static $projects = array(
+        'joomla-cms'  => array(
+            'githubUser'   => 'joomla',
+            'githubrepo'   => 'joomla-cms',
+            'projectAlias' => 'joomla-cms',
+        ),
+        'patchtester' => array(
+            'githubUser'   => 'joomla-extensions',
+            'githubrepo'   => 'patchtester',
+            'projectAlias' => 'patchtester',
+        ),
+        'weblinks'    => array(
+            'githubUser'   => 'joomla-extensions',
+            'githubrepo'   => 'weblinks',
+            'projectAlias' => 'weblinks',
+        ),
+    );
 
-	/**
-	 * Get the issue tracker project alias for a GitHub repository
-	 *
-	 * @param   string  $githubUser  The owner of the GitHub repository (user or organization)
-	 * @param   string  $githubRepo  The GitHub repository name
-	 *
-	 * @return  string|boolean  The project alias if supported or boolean false
-	 *
-	 * @since   2.0
-	 */
-	public static function getTrackerAlias($githubUser, $githubRepo)
-	{
-		// If the repo isn't even listed, no point in going further
-		if (!array_key_exists($githubRepo, self::$projects))
-		{
-			return false;
-		}
+    /**
+     * Get the issue tracker project alias for a GitHub repository
+     *
+     * @param   string  $githubUser  The owner of the GitHub repository (user or organization)
+     * @param   string  $githubRepo  The GitHub repository name
+     *
+     * @return  string|boolean  The project alias if supported or boolean false
+     *
+     * @since   2.0
+     */
+    public static function getTrackerAlias($githubUser, $githubRepo)
+    {
+        // If the repo isn't even listed, no point in going further
+        if (!array_key_exists($githubRepo, self::$projects)) {
+            return false;
+        }
 
-		// Now the GitHub user must match the project (we don't support forks, sorry!)
-		if (self::$projects[$githubRepo]['githubUser'] !== $githubUser)
-		{
-			return false;
-		}
+        // Now the GitHub user must match the project (we don't support forks, sorry!)
+        if (self::$projects[$githubRepo]['githubUser'] !== $githubUser) {
+            return false;
+        }
 
-		// This project is supported
-		return self::$projects[$githubRepo]['projectAlias'];
-	}
+        // This project is supported
+        return self::$projects[$githubRepo]['projectAlias'];
+    }
 }

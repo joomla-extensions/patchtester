@@ -3,11 +3,13 @@ kind: pipeline
 name: default
 
 clone:
-  depth: 42
 
 steps:
   - name: composer
-    image: joomlaprojects/docker-tools:develop
+    image: joomlaprojects/docker-images:php7.4
+    volumes:
+      - name: composer-cache
+        path: /tmp/composer-cache
     commands:
       - composer validate --no-check-all --strict
       - composer install --no-progress --no-suggest
@@ -16,10 +18,15 @@ steps:
     image: joomlaprojects/docker-images:php7.2
     commands:
       - echo $(date)
-      - ./administrator/components/com_patchtester/vendor/bin/phpcs --extensions=php -p --ignore=administrator/components/com_patchtester/vendor --standard=administrator/components/com_patchtester/vendor/joomla/cms-coding-standards/lib/Joomla-CMS administrator
+      - ./administrator/components/com_patchtester/vendor/bin/phpcs --extensions=php -p --standard=ruleset.xml .
       - echo $(date)
+
+volumes:
+  - name: composer-cache
+    host:
+      path: /tmp/composer-cache
 ---
 kind: signature
-hmac: c5899584898d37d46fb70cb22487532d41719c7a836be7f67ad4ac3c2267dafa
+hmac: 6894a15e535673bd3eb1cf2c8ee3f9cbac4b5a6e52aa26773add3e4943f3bd86
 
 ...

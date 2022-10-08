@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -18,85 +19,83 @@ use Joomla\Registry\Registry;
  */
 abstract class AbstractModel
 {
-	/**
-	 * The database driver.
-	 *
-	 * @var    \JDatabaseDriver
-	 * @since  4.0.0
-	 */
-	protected $db;
+    /**
+     * The database driver.
+     *
+     * @var    \JDatabaseDriver
+     * @since  4.0.0
+     */
+    protected $db;
+/**
+     * The model state.
+     *
+     * @var    Registry
+     * @since  4.0.0
+     */
+    protected $state;
+/**
+     * Instantiate the model.
+     *
+     * @param   Registry          $state  The model state.
+     * @param   \JDatabaseDriver  $db     The database adpater.
+     *
+     * @since   4.0.0
+     */
+    public function __construct(Registry $state = null, \JDatabaseDriver $db = null)
+    {
+        $this->state = $state ?: new Registry();
+        $this->db    = $db ?: Factory::getDbo();
+    }
 
-	/**
-	 * The model state.
-	 *
-	 * @var    Registry
-	 * @since  4.0.0
-	 */
-	protected $state;
+    /**
+     * Get the database driver.
+     *
+     * @return  \JDatabaseDriver
+     *
+     * @since   4.0.0
+     */
+    public function getDb()
+    {
+        return $this->db;
+    }
 
-	/**
-	 * Instantiate the model.
-	 *
-	 * @param   Registry          $state  The model state.
-	 * @param   \JDatabaseDriver  $db     The database adpater.
-	 *
-	 * @since   4.0.0
-	 */
-	public function __construct(Registry $state = null, \JDatabaseDriver $db = null)
-	{
-		$this->state = $state ?: new Registry;
-		$this->db    = $db ?: Factory::getDbo();
-	}
+    /**
+     * Get the model state.
+     *
+     * @return  Registry
+     *
+     * @since   4.0.0
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
 
-	/**
-	 * Get the database driver.
-	 *
-	 * @return  \JDatabaseDriver
-	 *
-	 * @since   4.0.0
-	 */
-	public function getDb()
-	{
-		return $this->db;
-	}
+    /**
+     * Set the database driver.
+     *
+     * @param   \JDatabaseDriver  $db  The database driver.
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function setDb(\JDatabaseDriver $db)
+    {
+        $this->db = $db;
+    }
 
-	/**
-	 * Get the model state.
-	 *
-	 * @return  Registry
-	 *
-	 * @since   4.0.0
-	 */
-	public function getState()
-	{
-		return $this->state;
-	}
-
-	/**
-	 * Set the database driver.
-	 *
-	 * @param   \JDatabaseDriver  $db  The database driver.
-	 *
-	 * @return  void
-	 *
-	 * @since   4.0.0
-	 */
-	public function setDb(\JDatabaseDriver $db)
-	{
-		$this->db = $db;
-	}
-
-	/**
-	 * Set the model state.
-	 *
-	 * @param   Registry  $state  The state object.
-	 *
-	 * @return  void
-	 *
-	 * @since   4.0.0
-	 */
-	public function setState(Registry $state)
-	{
-		$this->state = $state;
-	}
+    /**
+     * Set the model state.
+     *
+     * @param   Registry  $state  The state object.
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function setState(Registry $state)
+    {
+        $this->state = $state;
+    }
 }

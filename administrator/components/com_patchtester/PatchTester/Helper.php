@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -14,6 +15,10 @@ use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
 use PatchTester\GitHub\GitHub;
 
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
 /**
  * Helper class for the patch tester component
  *
@@ -21,69 +26,55 @@ use PatchTester\GitHub\GitHub;
  */
 abstract class Helper
 {
-	/**
-	 * Initializes the GitHub object
-	 *
-	 * @return  GitHub
-	 *
-	 * @since   2.0
-	 */
-	public static function initializeGithub()
-	{
-		$params = ComponentHelper::getParams('com_patchtester');
+    /**
+     * Initializes the GitHub object
+     *
+     * @return  GitHub
+     *
+     * @since   2.0
+     */
+    public static function initializeGithub()
+    {
+        $params = ComponentHelper::getParams('com_patchtester');
+        $options = new Registry();
+        // Set a user agent for the request
+        $options->set('userAgent', 'PatchTester/3.0');
+        // Set the default timeout to 120 seconds
+        $options->set('timeout', 120);
+        // Set the API URL
+        $options->set('api.url', 'https://api.github.com');
+        // If an API token is set in the params, use it for authentication
+        if ($params->get('gh_token', '')) {
+            $options->set('headers', ['Authorization' => 'token ' . $params->get('gh_token', '')]);
+        } else {
+            // Display a message about the lowered API limit without credentials
+            Factory::getApplication()->enqueueMessage(Text::_('COM_PATCHTESTER_NO_CREDENTIALS'), 'notice');
+        }
 
-		$options = new Registry;
+        return new GitHub($options);
+    }
 
-		// Set a user agent for the request
-		$options->set('userAgent', 'PatchTester/3.0');
-
-		// Set the default timeout to 120 seconds
-		$options->set('timeout', 120);
-
-		// Set the API URL
-		$options->set('api.url', 'https://api.github.com');
-
-		// If an API token is set in the params, use it for authentication
-		if ($params->get('gh_token', ''))
-		{
-			$options->set('headers', ['Authorization' => 'token ' . $params->get('gh_token', '')]);
-		}
-		// Display a message about the lowered API limit without credentials
-		else
-		{
-			Factory::getApplication()->enqueueMessage(Text::_('COM_PATCHTESTER_NO_CREDENTIALS'), 'notice');
-		}
-
-		return new GitHub($options);
-	}
-
-	/**
-	 * Initializes the CI Settings
-	 *
-	 * @return  Registry
-	 *
-	 * @since   3.0
-	 */
-	public static function initializeCISettings()
-	{
-		$params = ComponentHelper::getParams('com_patchtester');
-
-		$options = new Registry;
-
-		// Set CI server address for the request
-		$options->set('server.url', $params->get('ci_server', 'https://ci.joomla.org:444'));
-
-		// Set name of the zip archive
-		$options->set('zip.name', 'build.zip');
-		$options->set('zip.log.name', 'deleted_files.log');
-
-		// Set temp archive for extracting and downloading files
-		$options->set('folder.temp', Factory::getConfig()->get('tmp_path'));
-		$options->set('folder.backups', JPATH_COMPONENT . '/backups');
-
-		// Set full url for addressing the file
-		$options->set('zip.url', $options->get('server.url') . '/artifacts/joomla/joomla-cms/4.0-dev/%s/patchtester/' . $options->get('zip.name'));
-
-		return $options;
-	}
+    /**
+     * Initializes the CI Settings
+     *
+     * @return  Registry
+     *
+     * @since   3.0
+     */
+    public static function initializeCISettings()
+    {
+        $params = ComponentHelper::getParams('com_patchtester');
+        $options = new Registry();
+// Set CI server address for the request
+        $options->set('server.url', $params->get('ci_server', 'https://ci.joomla.org:444'));
+// Set name of the zip archive
+        $options->set('zip.name', 'build.zip');
+        $options->set('zip.log.name', 'deleted_files.log');
+// Set temp archive for extracting and downloading files
+        $options->set('folder.temp', Factory::getConfig()->get('tmp_path'));
+        $options->set('folder.backups', JPATH_COMPONENT . '/backups');
+// Set full url for addressing the file
+        $options->set('zip.url', $options->get('server.url') . '/artifacts/joomla/joomla-cms/4.0-dev/%s/patchtester/' . $options->get('zip.name'));
+        return $options;
+    }
 }

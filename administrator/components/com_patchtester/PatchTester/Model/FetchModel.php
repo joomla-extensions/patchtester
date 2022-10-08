@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Patch testing component for the Joomla! CMS
  *
@@ -7,6 +8,10 @@
  */
 
 namespace PatchTester\Model;
+
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
 
 /**
  * Model class for the fetch modal view
