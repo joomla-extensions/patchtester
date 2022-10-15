@@ -47,7 +47,7 @@ foreach ($this->items as $i => $item) :
                 <?php if ($this->trackerAlias) :
                     ?>
              <div class="col-md-auto">
-                  <a class="badge btn-info btn-sm"
+                  <a class="badge btn-info"
                        href="https://issues.joomla.org/tracker/<?php echo $this->trackerAlias; ?>/<?php echo $item->pull_id; ?>"
                      target="_blank">
                         <?php echo Text::_('COM_PATCHTESTER_VIEW_ON_JOOMLA_ISSUE_TRACKER'); ?>
