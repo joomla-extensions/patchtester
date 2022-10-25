@@ -34,14 +34,14 @@ class PullsModel extends ListModel
      * @since  2.0
      */
     protected $context;
-/**
+    /**
      * Array of fields the list can be sorted on
      *
      * @var    array
      * @since  2.0
      */
     protected $sortFields = array('pulls.pull_id', 'pulls.title');
-/**
+    /**
      * Constructor.
      *
      * @param   array  $config  An optional associative array of configuration settings.
@@ -155,9 +155,9 @@ class PullsModel extends ListModel
     {
         // Capture the last store id used.
         static $lastStoreId;
-// Compute the current store id.
+        // Compute the current store id.
         $currentStoreId = $this->getStoreId();
-// If the last store id is different from the current, refresh the query.
+        // If the last store id is different from the current, refresh the query.
         if ($lastStoreId != $currentStoreId || empty($this->query)) {
             $lastStoreId = $currentStoreId;
             $this->query = $this->getListQuery();
@@ -293,7 +293,7 @@ class PullsModel extends ListModel
         }
 
         try {
-// TODO - Option to configure the batch size
+        // TODO - Option to configure the batch size
             $batchSize = 100;
             $pullsResponse = Helper::initializeGithub()->getOpenPulls($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $page, $batchSize);
             $pulls = json_decode($pullsResponse->body);
@@ -303,11 +303,11 @@ class PullsModel extends ListModel
 
         // If this is page 1, let's check to see if we need to paginate
         if ($page === 1) {
-// Default this to being a single page of results
+            // Default this to being a single page of results
             $lastPage = 1;
             if (isset($pullsResponse->headers['link'])) {
                 $linkHeader = $pullsResponse->headers['link'];
-            // The `joomla/http` 2.0 package uses PSR-7 Responses which has a different format for headers, check for this
+                // The `joomla/http` 2.0 package uses PSR-7 Responses which has a different format for headers, check for this
                 if (is_array($linkHeader)) {
                     $linkHeader = $linkHeader[0];
                 }
@@ -339,7 +339,7 @@ class PullsModel extends ListModel
         $data   = [];
         $labels = [];
         foreach ($pulls as $pull) {
-        // Check if this PR is RTC and has a `PR-` branch label
+            // Check if this PR is RTC and has a `PR-` branch label
             $isRTC  = false;
             $isNPM  = false;
             $branch = $pull->base->ref;
