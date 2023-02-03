@@ -6,7 +6,10 @@
     "homepage": "https://github.com/joomla-extensions/patchtester",
     "license": "GPL-2.0-or-later",
     "config": {
-        "vendor-dir": "administrator/components/com_patchtester/vendor"
+        "vendor-dir": "administrator/components/com_patchtester/vendor",
+        "platform": {
+            "php": "7.2.5"
+        }
     },
     "require": {
         "php": "^7.2",
