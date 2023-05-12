@@ -564,10 +564,15 @@ class PullModel extends AbstractModel
         $filesResponse = $github->getFilesForPullRequest($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $id, $page);
         $files    = array_merge($files, json_decode($filesResponse->getBody(), false));
         $lastPage = 1;
+        $headers  = $filesResponse->getHeaders();
+
+        if (!isset($headers['link'])) {
+            return $files;
+        }
 
         preg_match(
             '/(\?page=[0-9]{1,3}>; rel=\"last\")/',
-            $filesResponse->getHeaders()['link'][0],
+            $headers['link'][0],
             $matches
         );
         if ($matches && isset($matches[0])) {
