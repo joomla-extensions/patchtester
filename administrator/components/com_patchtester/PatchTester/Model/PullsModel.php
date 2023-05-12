@@ -362,8 +362,8 @@ class PullsModel extends ListModel
             // Build the data object to store in the database
             $pullData = [
                 (int) $pull->number,
-                $this->getDbo()->quote(HTMLHelper::_('string.truncate', $pull->title, 150)),
-                $this->getDbo()->quote(HTMLHelper::_('string.truncate', $pull->body, 100)),
+                $this->getDbo()->quote(HTMLHelper::_('string.truncate', ($pull->title ?? ''), 150)),
+                $this->getDbo()->quote(HTMLHelper::_('string.truncate', ($pull->body ?? ''), 100)),
                 $this->getDbo()->quote($pull->html_url),
                 (int) $isRTC,
                 (int) $isNPM,
