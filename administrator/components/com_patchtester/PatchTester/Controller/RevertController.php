@@ -31,7 +31,7 @@ class RevertController extends AbstractController
 	{
 		try
 		{
-			$model = new PullModel(null, Factory::getDbo());
+			$model = new PullModel(null);
 
 			// Initialize the state for the model
 			$model->setState($this->initializeState($model));
