@@ -16,6 +16,7 @@ use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Version;
+use Joomla\Database\DatabaseDriver;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
@@ -88,11 +89,11 @@ class PullModel extends AbstractModel
      * Instantiate the model.
      *
      * @param   Registry          $state  The model state.
-     * @param   \JDatabaseDriver  $db     The database adpater.
+     * @param   DatabaseDriver  $db     The database adpater.
      *
      * @since   4.0.0
      */
-    public function __construct(Registry $state = null, \JDatabaseDriver $db = null)
+    public function __construct(Registry $state = null, DatabaseDriver $db = null)
     {
         parent::__construct($state, $db);
         $this->namespaceMapper = new \JNamespacePsr4Map();
@@ -113,7 +114,7 @@ class PullModel extends AbstractModel
     public function apply(int $id): bool
     {
         $params = ComponentHelper::getParams('com_patchtester');
-// Decide based on repository settings whether patch will be applied through Github or CIServer
+        // Decide based on repository settings whether patch will be applied through Github or CIServer
         if ((bool) $params->get('ci_switch', 0)) {
             return $this->applyWithCIServer($id);
         }

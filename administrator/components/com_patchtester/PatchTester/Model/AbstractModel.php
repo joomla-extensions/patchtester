@@ -10,6 +10,7 @@
 namespace PatchTester\Model;
 
 use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseDriver;
 use Joomla\Registry\Registry;
 
 /**
@@ -22,7 +23,7 @@ abstract class AbstractModel
     /**
      * The database driver.
      *
-     * @var    \JDatabaseDriver
+     * @var    DatabaseDriver
      * @since  4.0.0
      */
     protected $db;
@@ -33,15 +34,16 @@ abstract class AbstractModel
      * @since  4.0.0
      */
     protected $state;
-/**
+
+    /**
      * Instantiate the model.
      *
-     * @param   Registry          $state  The model state.
-     * @param   \JDatabaseDriver  $db     The database adpater.
+     * @param   Registry|null        $state  The model state.
+     * @param   DatabaseDriver|null  $db     The database adapter.
      *
      * @since   4.0.0
      */
-    public function __construct(Registry $state = null, \JDatabaseDriver $db = null)
+    public function __construct(Registry $state = null, DatabaseDriver $db = null)
     {
         $this->state = $state ?: new Registry();
         $this->db    = $db ?: Factory::getDbo();
@@ -50,7 +52,7 @@ abstract class AbstractModel
     /**
      * Get the database driver.
      *
-     * @return  \JDatabaseDriver
+     * @return  DatabaseDriver
      *
      * @since   4.0.0
      */
@@ -74,13 +76,13 @@ abstract class AbstractModel
     /**
      * Set the database driver.
      *
-     * @param   \JDatabaseDriver  $db  The database driver.
+     * @param   DatabaseDriver  $db  The database driver.
      *
      * @return  void
      *
      * @since   4.0.0
      */
-    public function setDb(\JDatabaseDriver $db)
+    public function setDb(DatabaseDriver $db)
     {
         $this->db = $db;
     }

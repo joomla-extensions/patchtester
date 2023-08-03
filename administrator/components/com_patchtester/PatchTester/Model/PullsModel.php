@@ -13,8 +13,10 @@ use Exception;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Database\DatabaseQuery;
 use PatchTester\GitHub\Exception\UnexpectedResponse;
 use PatchTester\Helper;
+use RuntimeException;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -40,7 +42,7 @@ class PullsModel extends ListModel
      * @var    array
      * @since  2.0
      */
-    protected $sortFields = array('pulls.pull_id', 'pulls.title');
+    protected $sortFields = ['pulls.pull_id', 'pulls.title'];
     /**
      * Constructor.
      *
@@ -86,7 +88,7 @@ class PullsModel extends ListModel
             $this->getStart(),
             $this->getState()->get('list.limit')
         );
-        $db    = $this->getDbo();
+        $db    = $this->getDatabase();
         $query = $db->getQuery(true)
             ->select($db->quoteName(['name', 'color']))
             ->from($db->quoteName('#__patchtester_pulls_labels'));
@@ -127,18 +129,18 @@ class PullsModel extends ListModel
     /**
      * Gets an array of objects from the results of database query.
      *
-     * @param   \JDatabaseQuery|string  $query       The query.
-     * @param   integer                 $limitstart  Offset.
-     * @param   integer                 $limit       The number of records.
+     * @param   DatabaseQuery|string  $query       The query.
+     * @param   integer               $limitstart  Offset.
+     * @param   integer               $limit       The number of records.
      *
      * @return  array  An array of results.
      *
      * @since   2.0
      * @throws  RuntimeException
      */
-    protected function getList($query, $limitstart = 0, $limit = 0)
+    protected function getList($query, int $limitstart = 0, int $limit = 0): array
     {
-        return $this->getDbo()->setQuery($query, $limitstart, $limit)
+        return $this->getDatabase()->setQuery($query, $limitstart, $limit)
             ->loadObjectList();
     }
 
@@ -147,11 +149,11 @@ class PullsModel extends ListModel
      *
      * This method ensures that the query is constructed only once for a given state of the model.
      *
-     * @return  \JDatabaseQuery  A JDatabaseQuery object
+     * @return  DatabaseQuery  A DatabaseQuery object
      *
      * @since   2.0
      */
-    protected function getListQueryCache()
+    protected function getListQueryCache(): DatabaseQuery
     {
         // Capture the last store id used.
         static $lastStoreId;
@@ -167,15 +169,15 @@ class PullsModel extends ListModel
     }
 
     /**
-     * Method to get a JDatabaseQuery object for retrieving the data set from a database.
+     * Method to get a DatabaseQuery object for retrieving the data set from a database.
      *
-     * @return  \JDatabaseQuery  A JDatabaseQuery object to retrieve the data set.
+     * @return  DatabaseQuery  A DatabaseQuery object to retrieve the data set.
      *
      * @since   2.0
      */
     protected function getListQuery()
     {
-        $db         = $this->getDbo();
+        $db         = $this->getDatabase();
         $query      = $db->getQuery(true);
         $labelQuery = $db->getQuery(true);
         $query->select('pulls.*')
@@ -270,7 +272,7 @@ class PullsModel extends ListModel
      *
      * @since   2.0
      */
-    public function getSortFields()
+    public function getSortFields(): array
     {
         return $this->sortFields;
     }
@@ -278,27 +280,28 @@ class PullsModel extends ListModel
     /**
      * Method to request new data from GitHub
      *
-     * @param   integer  $page  The page of the request
+     * @param   int  $page  The page of the request
      *
      * @return  array
      *
+     * @throws  RuntimeException
      * @since   2.0
-     * @throws  \RuntimeException
      */
-    public function requestFromGithub($page)
+    public function requestFromGithub(int $page): array
     {
         if ($page === 1) {
-            $this->getDbo()->truncateTable('#__patchtester_pulls');
-            $this->getDbo()->truncateTable('#__patchtester_pulls_labels');
+            $this->getDatabase()->truncateTable('#__patchtester_pulls');
+            $this->getDatabase()->truncateTable('#__patchtester_pulls_labels');
         }
 
         try {
-        // TODO - Option to configure the batch size
+            // TODO - Option to configure the batch size
             $batchSize = 100;
             $pullsResponse = Helper::initializeGithub()->getOpenPulls($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $page, $batchSize);
             $pulls = json_decode($pullsResponse->body);
         } catch (UnexpectedResponse $exception) {
-            throw new \RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_GITHUB_FETCH', $exception->getMessage()), $exception->getCode(), $exception);
+            throw new RuntimeException(
+                Text::sprintf('COM_PATCHTESTER_ERROR_GITHUB_FETCH', $exception->getMessage()), $exception->getCode(), $exception);
         }
 
         // If this is page 1, let's check to see if we need to paginate
@@ -354,20 +357,20 @@ class PullsModel extends ListModel
 
                 $labels[] = implode(',', [
                         (int) $pull->number,
-                        $this->getDbo()->quote($label->name),
-                        $this->getDbo()->quote($label->color),
+                        $this->getDatabase()->quote($label->name),
+                        $this->getDatabase()->quote($label->color),
                     ]);
             }
 
             // Build the data object to store in the database
             $pullData = [
                 (int) $pull->number,
-                $this->getDbo()->quote(HTMLHelper::_('string.truncate', ($pull->title ?? ''), 150)),
-                $this->getDbo()->quote(HTMLHelper::_('string.truncate', ($pull->body ?? ''), 100)),
-                $this->getDbo()->quote($pull->html_url),
+                $this->getDatabase()->quote(HTMLHelper::_('string.truncate', ($pull->title ?? ''), 150)),
+                $this->getDatabase()->quote(HTMLHelper::_('string.truncate', ($pull->body ?? ''), 100)),
+                $this->getDatabase()->quote($pull->html_url),
                 (int) $isRTC,
                 (int) $isNPM,
-                $this->getDbo()->quote($branch),
+                $this->getDatabase()->quote($branch),
                 ($pull->draft ? 1 : 0)
             ];
             $data[] = implode(',', $pullData);
@@ -379,25 +382,26 @@ class PullsModel extends ListModel
         }
 
         try {
-            $this->getDbo()->setQuery($this->getDbo()->getQuery(true)
+            $this->getDatabase()->setQuery($this->getDatabase()->getQuery(true)
                     ->insert('#__patchtester_pulls')
                     ->columns(['pull_id', 'title', 'description', 'pull_url',
                          'is_rtc', 'is_npm', 'branch', 'is_draft'])
                     ->values($data));
-            $this->getDbo()->execute();
-        } catch (\RuntimeException $exception) {
-            throw new \RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_INSERT_DATABASE', $exception->getMessage()), $exception->getCode(), $exception);
+            $this->getDatabase()->execute();
+        } catch (RuntimeException $exception) {
+            throw new RuntimeException(
+                Text::sprintf('COM_PATCHTESTER_ERROR_INSERT_DATABASE', $exception->getMessage()), $exception->getCode(), $exception);
         }
 
         if ($labels) {
             try {
-                $this->getDbo()->setQuery($this->getDbo()->getQuery(true)
+                $this->getDatabase()->setQuery($this->getDatabase()->getQuery(true)
                         ->insert('#__patchtester_pulls_labels')
                         ->columns(['pull_id', 'name', 'color'])
                         ->values($labels));
-                $this->getDbo()->execute();
-            } catch (\RuntimeException $exception) {
-                throw new \RuntimeException(
+                $this->getDatabase()->execute();
+            } catch (RuntimeException $exception) {
+                throw new RuntimeException(
                     Text::sprintf(
                         'COM_PATCHTESTER_ERROR_INSERT_DATABASE',
                         $exception->getMessage()
@@ -424,6 +428,6 @@ class PullsModel extends ListModel
      */
     public function truncateTable()
     {
-        $this->getDbo()->truncateTable('#__patchtester_pulls');
+        $this->getDatabase()->truncateTable('#__patchtester_pulls');
     }
 }
