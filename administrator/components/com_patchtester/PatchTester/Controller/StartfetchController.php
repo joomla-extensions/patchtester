@@ -87,7 +87,7 @@ class StartfetchController extends AbstractController
 			$this->getApplication()->close(1);
 		}
 
-		$testsModel = new TestsModel(null, Factory::getDbo());
+		$testsModel = new TestsModel(null);
 
 		try
 		{
