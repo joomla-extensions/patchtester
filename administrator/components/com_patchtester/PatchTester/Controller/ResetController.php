@@ -37,9 +37,9 @@ class ResetController extends AbstractController
 		{
 			$hasErrors = false;
 
-			$pullModel  = new PullModel(null, Factory::getDbo());
-			$pullsModel = new PullsModel($this->context, null, Factory::getDbo());
-			$testsModel = new TestsModel(null, Factory::getDbo());
+			$pullModel  = new PullModel(null);
+			$pullsModel = new PullsModel($this->context, null);
+			$testsModel = new TestsModel(null);
 
 			// Check the applied patches in the database first
 			$appliedPatches = $testsModel->getAppliedPatches();
