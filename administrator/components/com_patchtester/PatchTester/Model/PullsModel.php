@@ -301,7 +301,10 @@ class PullsModel extends ListModel
             $pulls = json_decode($pullsResponse->body);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
-                Text::sprintf('COM_PATCHTESTER_ERROR_GITHUB_FETCH', $exception->getMessage()), $exception->getCode(), $exception);
+                Text::sprintf('COM_PATCHTESTER_ERROR_GITHUB_FETCH', $exception->getMessage()),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         // If this is page 1, let's check to see if we need to paginate
@@ -390,7 +393,10 @@ class PullsModel extends ListModel
             $this->getDatabase()->execute();
         } catch (RuntimeException $exception) {
             throw new RuntimeException(
-                Text::sprintf('COM_PATCHTESTER_ERROR_INSERT_DATABASE', $exception->getMessage()), $exception->getCode(), $exception);
+                Text::sprintf('COM_PATCHTESTER_ERROR_INSERT_DATABASE', $exception->getMessage()),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         if ($labels) {
