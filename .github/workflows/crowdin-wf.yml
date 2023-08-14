@@ -22,7 +22,7 @@ jobs:
     
     # Runs the Crowdin action command - https://github.com/crowdin/github-action
     - name: crowdin action
-      uses: crowdin/github-action@1.1.2
+      uses: crowdin/github-action@v1.10.0
       with:
         # Upload sources to Crowdin
         upload_sources: true
