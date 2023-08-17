@@ -9,6 +9,7 @@
 	<authorUrl>https://www.joomla.org</authorUrl>
 	<version>4.2.2</version>
 	<description>COM_PATCHTESTER_XML_DESCRIPTION</description>
+	<namespace path="src">Joomla\Component\Patchtester</namespace>
 	<scriptfile>script.php</scriptfile>
 	<install>
 		<sql>
@@ -38,7 +39,7 @@
 		<folder>js</folder>
 	</media>
 	<administration>
-		<menu img="../media/com_patchtester/images/icon-16-patchtester.png">com_patchtester</menu>
+		<menu img="../media/com_patchtester/images/icon-16-patchtester.png" view="pulls">com_patchtester</menu>
 		<files folder="admin">
 			<folder>backups</folder>
 			<folder>forms</folder>
@@ -48,7 +49,6 @@
 			<folder>vendor</folder>
 			<filename>access.xml</filename>
 			<filename>config.xml</filename>
-			<filename>patchtester.php</filename>
 		</files>
 	</administration>
 	<updateservers>
