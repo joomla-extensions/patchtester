@@ -40,7 +40,7 @@ if (typeof Joomla === 'undefined') {
             jQuery.ajax({
                 type: 'GET',
                 url: path,
-                data: 'task=' + task,
+                data: `task=${task}.${task}`,
                 dataType: 'json',
                 success: function (response, textStatus, xhr) {
                     try {

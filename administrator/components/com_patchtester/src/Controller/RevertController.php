@@ -9,8 +9,8 @@
 
 namespace Joomla\Component\Patchtester\Administrator\Controller;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Patchtester\Administrator\Model\PullModel;
 
@@ -23,7 +23,7 @@ use Joomla\Component\Patchtester\Administrator\Model\PullModel;
  *
  * @since  2.0
  */
-class RevertController extends AbstractController
+class RevertController extends BaseController
 {
     /**
      * Execute the controller.
@@ -32,13 +32,12 @@ class RevertController extends AbstractController
      *
      * @since   2.0
      */
-    public function execute()
+    public function execute($task)
     {
         try {
-            $model = new PullModel(null, Factory::getDbo());
-// Initialize the state for the model
-            $model->setState($this->initializeState($model));
-            $model->revert($this->getInput()->getUint('pull_id'));
+            /** @var PullModel $model */
+            $model = $this->app->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pull', 'Administrator', ['ignore_request' => true]);
+            $model->revert($this->input->getUint('pull_id'));
             $msg  = Text::_('COM_PATCHTESTER_REVERT_OK');
             $type = 'message';
         } catch (\Exception $e) {
@@ -46,7 +45,7 @@ class RevertController extends AbstractController
             $type = 'error';
         }
 
-        $this->getApplication()->enqueueMessage($msg, $type);
-        $this->getApplication()->redirect(Route::_('index.php?option=com_patchtester', false));
+        $this->app->enqueueMessage($msg, $type);
+        $this->app->redirect(Route::_('index.php?option=com_patchtester', false));
     }
 }

@@ -11,10 +11,10 @@ namespace Joomla\Component\Patchtester\Administrator\Controller;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Session\Session;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
-use Joomla\Component\Patchtester\Administrator\Model\TestsModel;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -25,7 +25,7 @@ use Joomla\Component\Patchtester\Administrator\Model\TestsModel;
  *
  * @since  2.0
  */
-class StartfetchController extends AbstractController
+class StartfetchController extends BaseController
 {
     /**
      * Execute the controller.
@@ -34,20 +34,19 @@ class StartfetchController extends AbstractController
      *
      * @since   2.0
      */
-    public function execute()
+    public function execute($task): void
     {
-        // We don't want this request to be cached.
-        $this->getApplication()->setHeader('Expires', 'Mon, 1 Jan 2001 00:00:00 GMT', true);
-        $this->getApplication()->setHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT', true);
-        $this->getApplication()->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0', false);
-        $this->getApplication()->setHeader('Pragma', 'no-cache');
-        $this->getApplication()->setHeader('Content-Type', $this->getApplication()->mimeType . '; charset=' . $this->getApplication()->charSet);
-// Check for a valid token. If invalid, send a 403 with the error message.
+        $this->app->setHeader('Expires', 'Mon, 1 Jan 2001 00:00:00 GMT', true);
+        $this->app->setHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT', true);
+        $this->app->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0', false);
+        $this->app->setHeader('Pragma', 'no-cache');
+        $this->app->setHeader('Content-Type', $this->app->mimeType . '; charset=' . $this->app->charSet);
+
         if (!Session::checkToken('request')) {
             $response = new JsonResponse(new \Exception(Text::_('JINVALID_TOKEN'), 403));
-            $this->getApplication()->sendHeaders();
+            $this->app->sendHeaders();
             echo json_encode($response);
-            $this->getApplication()->close(1);
+            $this->app->close(1);
         }
 
         // Make sure we can fetch the data from GitHub - throw an error on < 10 available requests
@@ -56,40 +55,48 @@ class StartfetchController extends AbstractController
             $rate         = json_decode($rateResponse->body);
         } catch (\Exception $e) {
             $response = new JsonResponse(new \Exception(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $e->getMessage()), $e->getCode(), $e));
-            $this->getApplication()->sendHeaders();
+            $this->app->sendHeaders();
             echo json_encode($response);
-            $this->getApplication()->close(1);
+            $this->app->close(1);
         }
 
         // If over the API limit, we can't build this list
         if ($rate->resources->core->remaining < 10) {
             $response = new JsonResponse(new \Exception(Text::sprintf('COM_PATCHTESTER_API_LIMIT_LIST', Factory::getDate($rate->resources->core->reset)), 429));
-            $this->getApplication()->sendHeaders();
+            $this->app->sendHeaders();
             echo json_encode($response);
-            $this->getApplication()->close(1);
+            $this->app->close(1);
         }
 
-        $testsModel = new TestsModel(null, Factory::getDbo());
+        $testsModel = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory()->createModel('Tests', 'Administrator', ['ignore_request' => true]);
         try {
         // Sanity check, ensure there aren't any applied patches
             if (count($testsModel->getAppliedPatches()) >= 1) {
                 $response = new JsonResponse(new \Exception(Text::_('COM_PATCHTESTER_ERROR_APPLIED_PATCHES'), 500));
-                $this->getApplication()->sendHeaders();
+                $this->app->sendHeaders();
                 echo json_encode($response);
-                $this->getApplication()->close(1);
+                $this->app->close(1);
             }
         } catch (\Exception $e) {
             $response = new JsonResponse($e);
-            $this->getApplication()->sendHeaders();
+            $this->app->sendHeaders();
             echo json_encode($response);
-            $this->getApplication()->close(1);
+            $this->app->close(1);
         }
 
         // We're able to successfully pull data, prepare our environment
-        Factory::getSession()->set('com_patchtester_fetcher_page', 1);
-        $response = new JsonResponse(array('complete' => false, 'header' => Text::_('COM_PATCHTESTER_FETCH_PROCESSING', true)), Text::sprintf('COM_PATCHTESTER_FETCH_PAGE_NUMBER', 1), false, true);
-        $this->getApplication()->sendHeaders();
+        Factory::getApplication()->getSession()->set('com_patchtester_fetcher_page', 1);
+        $response = new JsonResponse(
+            [
+                'complete' => false,
+                'header' => Text::_('COM_PATCHTESTER_FETCH_PROCESSING', true)
+            ],
+            Text::sprintf('COM_PATCHTESTER_FETCH_PAGE_NUMBER', 1),
+            false,
+            true
+        );
+        $this->app->sendHeaders();
         echo json_encode($response);
-        $this->getApplication()->close();
+        $this->app->close();
     }
 }

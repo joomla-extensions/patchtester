@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<form addfieldprefix="PatchTester\Field">
+<form addfieldprefix="Joomla\Component\Patchtester\Administrator\Field">
 	<fields name="filter">
 		<field
 			name="search"
@@ -87,10 +87,10 @@
 			type="list"
 			onchange="this.form.submit();"
 		>
-			<option value="a.title ASC">JGLOBAL_TITLE_ASC</option>
-			<option value="a.title DESC">JGLOBAL_TITLE_DESC</option>
-			<option value="a.pull_id ASC">COM_PATCHTESTER_PULL_ID_ASC</option>
-			<option value="a.pull_id DESC">COM_PATCHTESTER_PULL_ID_DESC</option>
+			<option value="pulls.title ASC">JGLOBAL_TITLE_ASC</option>
+			<option value="pulls.title DESC">JGLOBAL_TITLE_DESC</option>
+			<option value="pulls.pull_id ASC">COM_PATCHTESTER_PULL_ID_ASC</option>
+			<option value="pulls.pull_id DESC">COM_PATCHTESTER_PULL_ID_DESC</option>
 		</field>
 
 		<field

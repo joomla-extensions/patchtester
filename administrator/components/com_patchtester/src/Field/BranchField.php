@@ -31,7 +31,8 @@ class BranchField extends ListField
      * @since  4.1.0
      */
     protected $type = 'Branch';
-/**
+
+    /**
      * Build a list of available branches.
      *
      * @return  array  List of options
@@ -40,14 +41,19 @@ class BranchField extends ListField
      */
     public function getOptions(): array
     {
-        $db    = Factory::getContainer()->get('DatabaseDriver');
+        $db = Factory::getContainer()->get('DatabaseDriver');
         $query = $db->getQuery(true);
-        $query->select('DISTINCT(' . $db->quoteName('branch') . ') AS ' . $db->quoteName('text'))
+        $query->select(
+            'DISTINCT(' . $db->quoteName('branch') . ') AS ' . $db->quoteName(
+                'text'
+            )
+        )
             ->select($db->quoteName('branch', 'value'))
             ->from('#__patchtester_pulls')
             ->where($db->quoteName('branch') . ' != ' . $db->quote(''))
             ->order($db->quoteName('branch') . ' ASC');
         $options = $db->setQuery($query)->loadAssocList();
+
         return array_merge(parent::getOptions(), $options);
     }
 }

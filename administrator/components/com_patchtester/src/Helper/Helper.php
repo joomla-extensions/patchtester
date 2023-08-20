@@ -12,8 +12,8 @@ namespace Joomla\Component\Patchtester\Administrator\Helper;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\Component\Patchtester\Administrator\GitHub\GitHub;
 use Joomla\Registry\Registry;
-use src\GitHub\GitHub;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;

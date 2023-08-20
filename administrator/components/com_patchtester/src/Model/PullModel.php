@@ -15,15 +15,17 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Version;
+use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedResponse;
+use Joomla\Component\Patchtester\Administrator\GitHub\GitHub;
+use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
-use Joomla\Database\DatabaseDriver;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
 use RuntimeException;
-use src\GitHub\Exception\UnexpectedResponse;
-use src\GitHub\GitHub;
 use stdClass;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -35,8 +37,9 @@ use stdClass;
  *
  * @since  2.0
  */
-class PullModel extends AbstractModel
+class PullModel extends BaseDatabaseModel
 {
+    use GithubCredentialsTrait;
     /**
      * Array containing top level non-production folders
      *
@@ -44,21 +47,21 @@ class PullModel extends AbstractModel
      * @since  2.0
      */
     protected $nonProductionFolders
-        = array(
+        = [
             'build',
             'docs',
             'installation',
             'tests',
             '.github',
-        );
-/**
+        ];
+    /**
      * Array containing non-production files
      *
      * @var    array
      * @since  2.0
      */
     protected $nonProductionFiles
-        = array(
+        = [
             '.drone.yml',
             '.gitignore',
             '.php_cs',
@@ -77,25 +80,27 @@ class PullModel extends AbstractModel
             'jorobo.dist.ini',
             'manifest.xml',
             'crowdin.yaml',
-        );
-/**
+        ];
+
+    /**
      * The namespace mapper
      *
      * @var    \JNamespacePsr4Map
      * @since  4.0.0
      */
     protected $namespaceMapper;
-/**
-     * Instantiate the model.
-     *
-     * @param   Registry          $state  The model state.
-     * @param   DatabaseDriver  $db     The database adpater.
-     *
-     * @since   4.0.0
+
+    /**
+     * @inheritDoc
      */
-    public function __construct(Registry $state = null, DatabaseDriver $db = null)
-    {
-        parent::__construct($state, $db);
+    public function __construct(
+        $config = [],
+        MVCFactoryInterface $factory = null
+    ) {
+        parent::__construct($config, $factory);
+
+        $this->state = $this->getCredentials();
+
         $this->namespaceMapper = new \JNamespacePsr4Map();
     }
 
@@ -103,19 +108,19 @@ class PullModel extends AbstractModel
      * Patches the code with the supplied pull request
      * However uses different methods for different repositories.
      *
-     * @param   integer  $id  ID of the pull request to apply
+     * @param   int  $id  ID of the pull request to apply
      *
-     * @return  boolean
-     *
-     * @since   3.0
+     * @return  bool
      *
      * @throws  RuntimeException
+     * @since   3.0
+     *
      */
     public function apply(int $id): bool
     {
         $params = ComponentHelper::getParams('com_patchtester');
         // Decide based on repository settings whether patch will be applied through Github or CIServer
-        if ((bool) $params->get('ci_switch', 0)) {
+        if ((bool)$params->get('ci_switch', 0)) {
             return $this->applyWithCIServer($id);
         }
 
@@ -129,9 +134,9 @@ class PullModel extends AbstractModel
      *
      * @return  boolean
      *
+     * @throws  RuntimeException
      * @since   3.0
      *
-     * @throws  RuntimeException
      */
     private function applyWithCIServer(int $id): bool
     {
@@ -151,10 +156,10 @@ class PullModel extends AbstractModel
             Folder::create($ciSettings->get('folder.temp'));
         }
 
-        $tempPath    = $ciSettings->get('folder.temp') . '/' . $id;
-        $backupsPath = $ciSettings->get('folder.backups') . '/' . $id;
-        $delLogPath = $tempPath . '/' . $ciSettings->get('zip.log.name');
-        $zipPath    = $tempPath . '/' . $ciSettings->get('zip.name');
+        $tempPath      = $ciSettings->get('folder.temp') . '/' . $id;
+        $backupsPath   = $ciSettings->get('folder.backups') . '/' . $id;
+        $delLogPath    = $tempPath . '/' . $ciSettings->get('zip.log.name');
+        $zipPath       = $tempPath . '/' . $ciSettings->get('zip.name');
         $serverZipPath = sprintf($ciSettings->get('zip.url'), $id);
 // Patch has already been applied
         if (file_exists($backupsPath)) {
@@ -163,7 +168,10 @@ class PullModel extends AbstractModel
 
         $version    = new Version();
         $httpOption = new Registry();
-        $httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
+        $httpOption->set(
+            'userAgent',
+            $version->getUserAgent('Joomla', true, false)
+        );
 // Try to download the zip file
         try {
             $http   = HttpFactory::getHttp($httpOption);
@@ -172,24 +180,33 @@ class PullModel extends AbstractModel
             $result = null;
         }
 
-        if ($result === null || ($result->getStatusCode() !== 200 && $result->getStatusCode() !== 310)) {
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_SERVER_RESPONDED_NOT_200'));
+        if ($result === null
+            || ($result->getStatusCode() !== 200
+                && $result->getStatusCode() !== 310)
+        ) {
+            throw new RuntimeException(
+                Text::_('COM_PATCHTESTER_SERVER_RESPONDED_NOT_200')
+            );
         }
 
         // Assign to variable to avlod PHP notice "Indirect modification of overloaded property"
-        $content = (string) $result->getBody();
+        $content = (string)$result->getBody();
 // Write the file to disk
         File::write($zipPath, $content);
 // Check if zip folder could have been downloaded
         if (!file_exists($zipPath)) {
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_ZIP_DOES_NOT_EXIST'));
+            throw new RuntimeException(
+                Text::_('COM_PATCHTESTER_ZIP_DOES_NOT_EXIST')
+            );
         }
 
         Folder::create($tempPath);
         $zip = new Zip();
         if (!$zip->extract($zipPath, $tempPath)) {
             Folder::delete($tempPath);
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_ZIP_EXTRACT_FAILED'));
+            throw new RuntimeException(
+                Text::_('COM_PATCHTESTER_ZIP_EXTRACT_FAILED')
+            );
         }
 
         // Remove zip to avoid get listing afterwards
@@ -198,14 +215,16 @@ class PullModel extends AbstractModel
         if ($this->verifyAutoloader($tempPath) === false) {
 // There is something broken in the autoloader, clean up and go back
             Folder::delete($tempPath);
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_PATCH_BREAKS_SITE'));
+            throw new RuntimeException(
+                Text::_('COM_PATCHTESTER_PATCH_BREAKS_SITE')
+            );
         }
 
         // Get files from deleted_logs
         $deletedFiles = (file_exists($delLogPath) ? file($delLogPath) : []);
         $deletedFiles = array_map('trim', $deletedFiles);
         if (file_exists($delLogPath)) {
-        // Remove deleted_logs to avoid get listing afterwards
+            // Remove deleted_logs to avoid get listing afterwards
             File::delete($delLogPath);
         }
 
@@ -220,7 +239,7 @@ class PullModel extends AbstractModel
                 $filePath = explode(DIRECTORY_SEPARATOR, Path::clean($file));
                 array_pop($filePath);
                 $filePath = implode(DIRECTORY_SEPARATOR, $filePath);
-            // Deleted_logs returns files as well as folder, if value is folder, unset and skip
+                // Deleted_logs returns files as well as folder, if value is folder, unset and skip
                 if (is_dir(JPATH_ROOT . '/' . $file)) {
                     unset($files[$key]);
                     continue;
@@ -232,21 +251,37 @@ class PullModel extends AbstractModel
                         Folder::create($backupsPath . '/' . $filePath);
                     }
 
-                    File::move(JPATH_ROOT . '/' . $file, $backupsPath . '/' . $file);
+                    File::move(
+                        JPATH_ROOT . '/' . $file,
+                        $backupsPath . '/' . $file
+                    );
                 }
 
                 if (file_exists($tempPath . '/' . $file)) {
 // Create directories if they don't exist until file
-                    if (!file_exists(JPATH_ROOT . '/' . $filePath) || !is_dir(JPATH_ROOT . '/' . $filePath)) {
+                    if (!file_exists(JPATH_ROOT . '/' . $filePath)
+                        || !is_dir(
+                            JPATH_ROOT . '/' . $filePath
+                        )
+                    ) {
                         Folder::create(JPATH_ROOT . '/' . $filePath);
                     }
 
-                    File::copy($tempPath . '/' . $file, JPATH_ROOT . '/' . $file);
+                    File::copy(
+                        $tempPath . '/' . $file,
+                        JPATH_ROOT . '/' . $file
+                    );
                 }
             } catch (RuntimeException $exception) {
                 Folder::delete($tempPath);
                 Folder::move($backupsPath, $backupsPath . '_failed');
-                throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_FAILED_APPLYING_PATCH', $file, $exception->getMessage()));
+                throw new RuntimeException(
+                    Text::sprintf(
+                        'COM_PATCHTESTER_FAILED_APPLYING_PATCH',
+                        $file,
+                        $exception->getMessage()
+                    )
+                );
             }
         }
 
@@ -258,6 +293,7 @@ class PullModel extends AbstractModel
 // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
+
         return true;
     }
 
@@ -269,9 +305,9 @@ class PullModel extends AbstractModel
      *
      * @return  stdClass The pull request data
      *
+     * @throws  RuntimeException
      * @since   2.0
      *
-     * @throws  RuntimeException
      */
     private function retrieveGitHubData(GitHub $github, int $id): stdClass
     {
@@ -279,19 +315,38 @@ class PullModel extends AbstractModel
             $rateResponse = $github->getRateLimit();
             $rate         = json_decode($rateResponse->body, false);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $exception->getMessage()), $exception->getCode(), $exception);
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
+                    $exception->getMessage()
+                ), $exception->getCode(), $exception
+            );
         }
 
         // If over the API limit, we can't build this list
-        if ((int) $rate->resources->core->remaining === 0) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_API_LIMIT_LIST', Factory::getDate($rate->resources->core->reset)));
+        if ((int)$rate->resources->core->remaining === 0) {
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_API_LIMIT_LIST',
+                    Factory::getDate($rate->resources->core->reset)
+                )
+            );
         }
 
         try {
-            $pullResponse = $github->getPullRequest($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $id);
+            $pullResponse = $github->getPullRequest(
+                $this->getState()->get('github_user'),
+                $this->getState()->get('github_repo'),
+                $id
+            );
             $pull         = json_decode($pullResponse->body, false);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $exception->getMessage()), $exception->getCode(), $exception);
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
+                    $exception->getMessage()
+                ), $exception->getCode(), $exception
+            );
         }
 
         return $pull;
@@ -309,7 +364,7 @@ class PullModel extends AbstractModel
     private function verifyAutoloader(string $path): bool
     {
         $result = false;
-// Check if we have an autoload file
+        // Check if we have an autoload file
         if (!file_exists($path . '/libraries/vendor/autoload.php')) {
             return $result;
         }
@@ -322,35 +377,50 @@ class PullModel extends AbstractModel
             'autoload_psr4.php',
         ];
         $filesToCheck  = [];
-        array_walk($composerFiles, static function ($composerFile) use (&$filesToCheck, $path) {
-
-            if (file_exists($path . '/libraries/vendor/composer/' . $composerFile) === false) {
-                return;
-            }
-
-            if ($composerFile === 'autoload_static.php') {
-// Get the generated token
-                $autoload    = file_get_contents($path . '/libraries/vendor/autoload.php');
-                $resultMatch = preg_match('/ComposerAutoloaderInit(.*)::/', $autoload, $match);
-                if (!$resultMatch) {
+        array_walk(
+            $composerFiles,
+            static function ($composerFile) use (&$filesToCheck, $path) {
+                if (file_exists(
+                        $path . '/libraries/vendor/composer/' . $composerFile
+                    ) === false
+                ) {
                     return;
                 }
 
-                // Check if the class is already defined
-                $autoloadClass = '\Composer\Autoload\ComposerStaticInit' . $match[1];
-                if (class_exists($autoloadClass)) {
-                    return;
-                }
+                if ($composerFile === 'autoload_static.php') {
+                    // Get the generated token
+                    $autoload    = file_get_contents(
+                        $path . '/libraries/vendor/autoload.php'
+                    );
+                    $resultMatch = preg_match(
+                        '/ComposerAutoloaderInit(.*)::/',
+                        $autoload,
+                        $match
+                    );
+                    if (!$resultMatch) {
+                        return;
+                    }
 
-                require_once $path . '/libraries/vendor/composer/autoload_static.php';
-// Get all the files
-                $files = $autoloadClass::$files;
-                $filesToCheck = array_merge($filesToCheck, $files);
-            } else {
-                $files = require $path . '/libraries/vendor/composer/' . $composerFile;
-                $filesToCheck = array_merge($filesToCheck, $files);
+                    // Check if the class is already defined
+                    $autoloadClass = '\Composer\Autoload\ComposerStaticInit'
+                        . $match[1];
+                    if (class_exists($autoloadClass)) {
+                        return;
+                    }
+
+                    require_once $path
+                        . '/libraries/vendor/composer/autoload_static.php';
+                    // Get all the files
+                    $files        = $autoloadClass::$files;
+                    $filesToCheck = array_merge($filesToCheck, $files);
+                } else {
+                    $files        = require $path
+                        . '/libraries/vendor/composer/' . $composerFile;
+                    $filesToCheck = array_merge($filesToCheck, $files);
+                }
             }
-        });
+        );
+
         return $this->checkFilesExist($filesToCheck, $path);
     }
 
@@ -393,24 +463,29 @@ class PullModel extends AbstractModel
      *
      * @since   3.0
      */
-    private function saveAppliedPatch(int $id, array $fileList, string $sha = null): int
-    {
-        $record = (object) array(
+    private function saveAppliedPatch(
+        int $id,
+        array $fileList,
+        string $sha = null
+    ): int {
+        $record = (object)[
             'pull_id'         => $id,
             'data'            => json_encode($fileList),
             'patched_by'      => Factory::getUser()->id,
             'applied'         => 1,
             'applied_version' => JVERSION,
-        );
-        $db = $this->getDb();
+        ];
+        $db     = $this->getDatabase();
         $db->insertObject('#__patchtester_tests', $record);
         $insertId = $db->insertid();
         if ($sha !== null) {
-        // Insert the retrieved commit SHA into the pulls table for this item
-            $db->setQuery($db->getQuery(true)
+            // Insert the retrieved commit SHA into the pulls table for this item
+            $db->setQuery(
+                $db->getQuery(true)
                     ->update('#__patchtester_pulls')
                     ->set('sha = ' . $db->quote($sha))
-                    ->where($db->quoteName('pull_id') . ' = ' . $id))->execute();
+                    ->where($db->quoteName('pull_id') . ' = ' . $id)
+            )->execute();
         }
 
         return $insertId;
@@ -423,14 +498,14 @@ class PullModel extends AbstractModel
      *
      * @return  boolean
      *
+     * @throws  RuntimeException
      * @since   2.0
      *
-     * @throws  RuntimeException
      */
     private function applyWithGitHub(int $id): bool
     {
         $github = Helper::initializeGithub();
-        $pull = $this->retrieveGitHubData($github, $id);
+        $pull   = $this->retrieveGitHubData($github, $id);
         if ($pull->head->repo === null) {
             throw new RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
         }
@@ -438,7 +513,12 @@ class PullModel extends AbstractModel
         try {
             $files = $this->getFiles($id, 1);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $exception->getMessage()), $exception->getCode(), $exception);
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
+                    $exception->getMessage()
+                ), $exception->getCode(), $exception
+            );
         }
 
         if (!count($files)) {
@@ -454,7 +534,12 @@ class PullModel extends AbstractModel
             switch ($file->action) {
                 case 'deleted':
                     if (!file_exists(JPATH_ROOT . '/' . $file->filename)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_FILE_DELETED_DOES_NOT_EXIST_S', $file->filename));
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_FILE_DELETED_DOES_NOT_EXIST_S',
+                                $file->filename
+                            )
+                        );
                     }
 
 
@@ -463,17 +548,43 @@ class PullModel extends AbstractModel
                 case 'modified':
                 case 'renamed':
                     // If the backup file already exists, we can't apply the patch
-                    if (file_exists(JPATH_COMPONENT . '/backups/' . md5($file->filename) . '.txt')) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_CONFLICT_S', $file->filename));
+                    if (file_exists(
+                        JPATH_COMPONENT . '/backups/' . md5($file->filename)
+                        . '.txt'
+                    )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_CONFLICT_S',
+                                $file->filename
+                            )
+                        );
                     }
 
-                    if ($file->action === 'modified' && !file_exists(JPATH_ROOT . '/' . $file->filename)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_FILE_MODIFIED_DOES_NOT_EXIST_S', $file->filename));
+                    if ($file->action === 'modified'
+                        && !file_exists(
+                            JPATH_ROOT . '/' . $file->filename
+                        )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_FILE_MODIFIED_DOES_NOT_EXIST_S',
+                                $file->filename
+                            )
+                        );
                     }
 
                     try {
-                        $contentsResponse = $github->getFileContents($pull->head->user->login, $pull->head->repo->name, $file->repofilename, urlencode($pull->head->ref));
-                        $contents = json_decode($contentsResponse->body, false);
+                        $contentsResponse = $github->getFileContents(
+                            $pull->head->user->login,
+                            $pull->head->repo->name,
+                            $file->repofilename,
+                            urlencode($pull->head->ref)
+                        );
+                        $contents         = json_decode(
+                            $contentsResponse->body,
+                            false
+                        );
                         // In case encoding type ever changes
                         switch ($contents->encoding) {
                             case 'base64':
@@ -481,10 +592,19 @@ class PullModel extends AbstractModel
 
                                 break;
                             default:
-                                throw new RuntimeException(Text::_('COM_PATCHTESTER_ERROR_UNSUPPORTED_ENCODING'));
+                                throw new RuntimeException(
+                                    Text::_(
+                                        'COM_PATCHTESTER_ERROR_UNSUPPORTED_ENCODING'
+                                    )
+                                );
                         }
                     } catch (UnexpectedResponse $exception) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $exception->getMessage()), $exception->getCode(), $exception);
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
+                                $exception->getMessage()
+                            ), $exception->getCode(), $exception
+                        );
                     }
 
                     break;
@@ -496,40 +616,84 @@ class PullModel extends AbstractModel
             // We only create a backup if the file already exists
             if (
                 $file->action === 'deleted'
-                || (file_exists(JPATH_ROOT . '/' . $file->filename) && $file->action === 'modified')
-                || (file_exists(JPATH_ROOT . '/' . $file->originalFile) && $file->action === 'renamed')
+                || (file_exists(JPATH_ROOT . '/' . $file->filename)
+                    && $file->action === 'modified')
+                || (file_exists(JPATH_ROOT . '/' . $file->originalFile)
+                    && $file->action === 'renamed')
             ) {
-                $filename = $file->action === 'renamed' ? $file->originalFile : $file->filename;
+                $filename = $file->action === 'renamed' ? $file->originalFile
+                    : $file->filename;
                 $src      = JPATH_ROOT . '/' . $filename;
-                $dest     = JPATH_COMPONENT . '/backups/' . md5($filename) . '.txt';
+                $dest     = JPATH_COMPONENT . '/backups/' . md5($filename)
+                    . '.txt';
                 if (!File::copy(Path::clean($src), $dest)) {
-                    throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE', $src, $dest));
+                    throw new RuntimeException(
+                        Text::sprintf(
+                            'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
+                            $src,
+                            $dest
+                        )
+                    );
                 }
             }
 
             switch ($file->action) {
                 case 'modified':
                 case 'added':
-                    if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE', JPATH_ROOT . '/' . $file->filename));
+                    if (!File::write(
+                        Path::clean(JPATH_ROOT . '/' . $file->filename),
+                        $file->body
+                    )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
+                                JPATH_ROOT . '/' . $file->filename
+                            )
+                        );
                     }
 
 
                     break;
                 case 'deleted':
-                    if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->filename))) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', JPATH_ROOT . '/' . $file->filename));
+                    if (!File::delete(
+                        Path::clean(JPATH_ROOT . '/' . $file->filename)
+                    )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                JPATH_ROOT . '/' . $file->filename
+                            )
+                        );
                     }
 
 
                     break;
                 case 'renamed':
-                    if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->originalFile))) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', JPATH_ROOT . '/' . $file->originalFile));
+                    if (!File::delete(
+                        Path::clean(JPATH_ROOT . '/' . $file->originalFile)
+                    )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                JPATH_ROOT . '/' . $file->originalFile
+                            )
+                        );
                     }
 
-                    if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE', JPATH_ROOT . '/' . $file->filename));
+                    if (!File::write(
+                        Path::clean(JPATH_ROOT . '/' . $file->filename),
+                        $file->body
+                    )
+                    ) {
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
+                                JPATH_ROOT . '/' . $file->filename
+                            )
+                        );
                     }
 
                     break;
@@ -545,6 +709,7 @@ class PullModel extends AbstractModel
         // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
+
         return true;
     }
 
@@ -561,11 +726,19 @@ class PullModel extends AbstractModel
      */
     private function getFiles(int $id, int $page, array $files = []): array
     {
-        $github = Helper::initializeGithub();
-        $filesResponse = $github->getFilesForPullRequest($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $id, $page);
-        $files    = array_merge($files, json_decode($filesResponse->getBody(), false));
-        $lastPage = 1;
-        $headers  = $filesResponse->getHeaders();
+        $github        = Helper::initializeGithub();
+        $filesResponse = $github->getFilesForPullRequest(
+            $this->getState()->get('github_user'),
+            $this->getState()->get('github_repo'),
+            $id,
+            $page
+        );
+        $files         = array_merge(
+            $files,
+            json_decode($filesResponse->getBody(), false)
+        );
+        $lastPage      = 1;
+        $headers       = $filesResponse->getHeaders();
 
         if (!isset($headers['link'])) {
             return $files;
@@ -578,7 +751,7 @@ class PullModel extends AbstractModel
         );
         if ($matches && isset($matches[0])) {
             preg_match('/\d+/', $matches[0], $pages);
-            $lastPage = (int) $pages[0];
+            $lastPage = (int)$pages[0];
         }
 
         if ($page <= $lastPage) {
@@ -600,10 +773,10 @@ class PullModel extends AbstractModel
     private function parseFileList(array $files): array
     {
         $parsedFiles = array();
-/*
-        * Check if the patch tester is running in a development environment
-        * If we are not in development, we'll need to check the exclusion lists
-         */
+        /*
+                * Check if the patch tester is running in a development environment
+                * If we are not in development, we'll need to check the exclusion lists
+                 */
         $isDev = file_exists(JPATH_INSTALLATION . '/index.php');
         foreach ($files as $file) {
             if (!$isDev) {
@@ -621,20 +794,24 @@ class PullModel extends AbstractModel
             $prodFileName        = $file->filename;
             $prodRenamedFileName = $file->previous_filename ?? false;
             $filePath            = explode('/', $prodFileName);
-        // Remove the `src` here to match the CMS paths if needed
+            // Remove the `src` here to match the CMS paths if needed
             if ($filePath[0] === 'src') {
                 $prodFileName = str_replace('src/', '', $prodFileName);
             }
 
             if ($prodRenamedFileName) {
                 $filePath = explode('/', $prodRenamedFileName);
-        // Remove the `src` here to match the CMS paths if needed
+                // Remove the `src` here to match the CMS paths if needed
                 if ($filePath[0] === 'src') {
-                    $prodRenamedFileName = str_replace('src/', '', $prodRenamedFileName);
+                    $prodRenamedFileName = str_replace(
+                        'src/',
+                        '',
+                        $prodRenamedFileName
+                    );
                 }
             }
 
-            $parsedFiles[] = (object) array(
+            $parsedFiles[] = (object)array(
                 'action'       => $file->status,
                 'filename'     => $prodFileName,
                 'repofilename' => $file->filename,
@@ -654,14 +831,14 @@ class PullModel extends AbstractModel
      *
      * @return  boolean
      *
-     * @since   3.0
      * @throws  RuntimeException
+     * @since   3.0
      */
     public function revert(int $id): bool
     {
         $params = ComponentHelper::getParams('com_patchtester');
 // Decide based on repository settings whether patch will be applied through Github or CIServer
-        if ((bool) $params->get('ci_switch', 0)) {
+        if ((bool)$params->get('ci_switch', 0)) {
             return $this->revertWithCIServer($id);
         }
 
@@ -675,8 +852,8 @@ class PullModel extends AbstractModel
      *
      * @return  boolean
      *
-     * @since   3.0
      * @throws  RuntimeException
+     * @since   3.0
      */
     public function revertWithCIServer(int $id): bool
     {
@@ -690,10 +867,17 @@ class PullModel extends AbstractModel
 
         $files = json_decode($testRecord->data, false);
         if (!$files) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE', __METHOD__, htmlentities($testRecord->data)));
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE',
+                    __METHOD__,
+                    htmlentities($testRecord->data)
+                )
+            );
         }
 
-        $backupsPath = $ciSettings->get('folder.backups') . "/$testRecord->pull_id";
+        $backupsPath = $ciSettings->get('folder.backups')
+            . "/$testRecord->pull_id";
         foreach ($files as $file) {
             try {
                 $filePath = explode("\\", $file);
@@ -704,11 +888,16 @@ class PullModel extends AbstractModel
                     File::delete(JPATH_ROOT . "/$file");
                     // Move from backup, if it exists there
                     if (file_exists($backupsPath . '/' . $file)) {
-                        File::move($backupsPath . '/' . $file, JPATH_ROOT . '/' . $file);
+                        File::move(
+                            $backupsPath . '/' . $file,
+                            JPATH_ROOT . '/' . $file
+                        );
                     }
 
                     // If folder is empty, remove it as well
-                    if (count(glob(JPATH_ROOT . '/' . $filePath . '/*')) === 0) {
+                    if (count(glob(JPATH_ROOT . '/' . $filePath . '/*'))
+                        === 0
+                    ) {
                         Folder::delete(JPATH_ROOT . '/' . $filePath);
                     }
                 } elseif (file_exists($backupsPath . '/' . $file)) {
@@ -717,10 +906,19 @@ class PullModel extends AbstractModel
                         Folder::create(JPATH_ROOT . '/' . $filePath);
                     }
 
-                    File::move($backupsPath . '/' . $file, JPATH_ROOT . '/' . $file);
+                    File::move(
+                        $backupsPath . '/' . $file,
+                        JPATH_ROOT . '/' . $file
+                    );
                 }
             } catch (RuntimeException $exception) {
-                throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_FAILED_REVERT_PATCH', $file, $exception->getMessage()));
+                throw new RuntimeException(
+                    Text::sprintf(
+                        'COM_PATCHTESTER_FAILED_REVERT_PATCH',
+                        $file,
+                        $exception->getMessage()
+                    )
+                );
             }
         }
 
@@ -730,6 +928,7 @@ class PullModel extends AbstractModel
 // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
+
         return $this->removeTest($testRecord);
     }
 
@@ -744,11 +943,14 @@ class PullModel extends AbstractModel
      */
     private function getTestRecord(int $id): stdClass
     {
-        $db = $this->getDb();
-        return $db->setQuery($db->getQuery(true)
+        $db = $this->getDatabase();
+
+        return $db->setQuery(
+            $db->getQuery(true)
                 ->select('*')
                 ->from('#__patchtester_tests')
-                ->where('id = ' . (int) $id))->loadObject();
+                ->where('id = ' . (int)$id)
+        )->loadObject();
     }
 
     /**
@@ -762,16 +964,21 @@ class PullModel extends AbstractModel
      */
     private function removeTest(stdClass $testRecord): bool
     {
-        $db = $this->getDb();
-// Remove the retrieved commit SHA from the pulls table for this item
-        $db->setQuery($db->getQuery(true)
+        $db = $this->getDatabase();
+        // Remove the retrieved commit SHA from the pulls table for this item
+        $db->setQuery(
+            $db->getQuery(true)
                 ->update('#__patchtester_pulls')
                 ->set('sha = ' . $db->quote(''))
-                ->where($db->quoteName('id') . ' = ' . (int) $testRecord->id))->execute();
-// And delete the record from the tests table
-        $db->setQuery($db->getQuery(true)
+                ->where($db->quoteName('id') . ' = ' . (int)$testRecord->id)
+        )->execute();
+        // And delete the record from the tests table
+        $db->setQuery(
+            $db->getQuery(true)
                 ->delete('#__patchtester_tests')
-                ->where('id = ' . (int) $testRecord->id))->execute();
+                ->where('id = ' . (int)$testRecord->id)
+        )->execute();
+
         return true;
     }
 
@@ -782,8 +989,8 @@ class PullModel extends AbstractModel
      *
      * @return  boolean
      *
-     * @since   2.0
      * @throws  RuntimeException
+     * @since   2.0
      */
     public function revertWithGitHub(int $id): bool
     {
@@ -795,22 +1002,40 @@ class PullModel extends AbstractModel
 
         $files = json_decode($testRecord->data, false);
         if (!$files) {
-            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE', __METHOD__, htmlentities($testRecord->data)));
+            throw new RuntimeException(
+                Text::sprintf(
+                    'COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE',
+                    __METHOD__,
+                    htmlentities($testRecord->data)
+                )
+            );
         }
 
         foreach ($files as $file) {
             switch ($file->action) {
                 case 'deleted':
                 case 'modified':
-                    $src  = JPATH_COMPONENT . '/backups/' . md5($file->filename) . '.txt';
+                    $src  = JPATH_COMPONENT . '/backups/' . md5($file->filename)
+                        . '.txt';
                     $dest = JPATH_ROOT . '/' . $file->filename;
                     if (!File::copy($src, $dest)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE', $src, $dest));
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
+                                $src,
+                                $dest
+                            )
+                        );
                     }
 
                     if (file_exists($src)) {
                         if (!File::delete($src)) {
-                            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', $src));
+                            throw new RuntimeException(
+                                Text::sprintf(
+                                    'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                    $src
+                                )
+                            );
                         }
                     }
 
@@ -820,28 +1045,51 @@ class PullModel extends AbstractModel
                     $src = JPATH_ROOT . '/' . $file->filename;
                     if (file_exists($src)) {
                         if (!File::delete($src)) {
-                            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', $src));
+                            throw new RuntimeException(
+                                Text::sprintf(
+                                    'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                    $src
+                                )
+                            );
                         }
                     }
 
                     break;
                 case 'renamed':
-                    $originalSrc = JPATH_COMPONENT . '/backups/' . md5($file->originalFile) . '.txt';
+                    $originalSrc = JPATH_COMPONENT . '/backups/' . md5(
+                            $file->originalFile
+                        ) . '.txt';
                     $newSrc      = JPATH_ROOT . '/' . $file->filename;
                     $dest        = JPATH_ROOT . '/' . $file->originalFile;
                     if (!File::copy($originalSrc, $dest)) {
-                        throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE', $originalSrc, $dest));
+                        throw new RuntimeException(
+                            Text::sprintf(
+                                'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
+                                $originalSrc,
+                                $dest
+                            )
+                        );
                     }
 
                     if (file_exists($originalSrc)) {
                         if (!File::delete($originalSrc)) {
-                            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', $originalSrc));
+                            throw new RuntimeException(
+                                Text::sprintf(
+                                    'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                    $originalSrc
+                                )
+                            );
                         }
                     }
 
                     if (file_exists($newSrc)) {
                         if (!File::delete($newSrc)) {
-                            throw new RuntimeException(Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', $newSrc));
+                            throw new RuntimeException(
+                                Text::sprintf(
+                                    'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
+                                    $newSrc
+                                )
+                            );
                         }
                     }
 
@@ -855,6 +1103,7 @@ class PullModel extends AbstractModel
 // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
+
         return $this->removeTest($testRecord);
     }
 }

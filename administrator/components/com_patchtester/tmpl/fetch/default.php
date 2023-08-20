@@ -15,8 +15,6 @@ use Joomla\CMS\Language\Text;
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-/** @var \Joomla\Component\Patchtester\Administrator\View\DefaultHtmlView $this */
-
 HTMLHelper::_('jquery.framework');
 HTMLHelper::_('behavior.core');
 HTMLHelper::_('script', 'com_patchtester/fetcher.js', ['version' => 'auto', 'relative' => true]);
@@ -30,5 +28,5 @@ Text::script('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED');
   <div id="progress" class="progress">
        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" role="progressbar"></div>
     </div>
-    <input id="patchtester-token" type="hidden" name="<?php echo Factory::getSession()->getFormToken(); ?>" value="1" />
+    <input id="patchtester-token" type="hidden" name="<?php echo Factory::getApplication()->getSession()->getFormToken(); ?>" value="1" />
 </div>

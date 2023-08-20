@@ -11,6 +11,7 @@ namespace Joomla\Component\Patchtester\Administrator\Controller;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Patchtester\Administrator\Model\PullModel;
 
@@ -24,7 +25,7 @@ use Joomla\Component\Patchtester\Administrator\Model\PullModel;
  *
  * @since  2.0
  */
-class ApplyController extends AbstractController
+class ApplyController extends BaseController
 {
     /**
      * Execute the controller.
@@ -33,16 +34,15 @@ class ApplyController extends AbstractController
      *
      * @since   2.0
      */
-    public function execute()
+    public function execute($task): void
     {
         try {
-            $model = new PullModel(null, Factory::getDbo());
-// Initialize the state for the model
-            $model->setState($this->initializeState($model));
-            if ($model->apply($this->getInput()->getUint('pull_id'))) {
+            /** @var PullModel $model */
+            $model = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pull', 'Administrator', ['ignore_request' => true]);
+            $msg = Text::_('COM_PATCHTESTER_NO_FILES_TO_PATCH');
+
+            if ($model->apply($this->input->getUint('pull_id'))) {
                 $msg = Text::_('COM_PATCHTESTER_APPLY_OK');
-            } else {
-                $msg = Text::_('COM_PATCHTESTER_NO_FILES_TO_PATCH');
             }
 
             $type = 'message';
@@ -51,7 +51,7 @@ class ApplyController extends AbstractController
             $type = 'error';
         }
 
-        $this->getApplication()->enqueueMessage($msg, $type);
-        $this->getApplication()->redirect(Route::_('index.php?option=com_patchtester', false));
+        $this->app->enqueueMessage($msg, $type);
+        $this->app->redirect(Route::_('index.php?option=com_patchtester', false));
     }
 }

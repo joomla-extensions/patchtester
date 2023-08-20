@@ -13,6 +13,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Patchtester\Administrator\Model\PullModel;
 use Joomla\Component\Patchtester\Administrator\Model\PullsModel;
@@ -28,7 +29,7 @@ use Joomla\Filesystem\File;
  *
  * @since  2.0
  */
-class ResetController extends AbstractController
+class ResetController extends BaseController
 {
     /**
      * Execute the controller.
@@ -37,20 +38,25 @@ class ResetController extends AbstractController
      *
      * @since   2.0
      */
-    public function execute(): void
+    public function execute($task): void
     {
         try {
             $hasErrors     = false;
             $revertErrored = false;
-            $pullModel  = new PullModel(null, Factory::getDbo());
-            $pullsModel = new PullsModel($this->context, null, Factory::getDbo());
-            $testsModel = new TestsModel(null, Factory::getDbo());
-// Check the applied patches in the database first
+            $mvcFactory = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory();
+            /** @var PullModel $pullModel */
+            $pullModel  = $mvcFactory->createModel('Pull', 'Administrator', ['ignore_request' => true]);
+            /** @var PullsModel $pullModel */
+            $pullsModel = $mvcFactory->createModel('Pulls', 'Administrator', ['ignore_request' => true]);
+            /** @var TestsModel $pullModel */
+            $testsModel = $mvcFactory->createModel('Tests', 'Administrator', ['ignore_request' => true]);
+
+            // Check the applied patches in the database first
             $appliedPatches = $testsModel->getAppliedPatches();
             $params = ComponentHelper::getParams('com_patchtester');
-// Decide based on repository settings whether patch will be applied through Github or CIServer
+            // Decide based on repository settings whether patch will be applied through Github or CIServer
             if ((bool) $params->get('ci_switch', 1)) {
-// Let's try to cleanly revert all applied patches with ci
+                // Let's try to cleanly revert all applied patches with ci
                 foreach ($appliedPatches as $patch) {
                     try {
                         $pullModel->revertWithCIServer($patch->id);
@@ -76,7 +82,7 @@ class ResetController extends AbstractController
                 } catch (\RuntimeException $e) {
                     $hasErrors = true;
 
-                    $this->getApplication()->enqueueMessage(
+                    $this->app->enqueueMessage(
                         Text::sprintf('COM_PATCHTESTER_ERROR_TRUNCATING_PULLS_TABLE', $e->getMessage()),
                         'error'
                     );
@@ -89,7 +95,7 @@ class ResetController extends AbstractController
             } catch (\RuntimeException $e) {
                 $hasErrors = true;
 
-                $this->getApplication()->enqueueMessage(
+                $this->app->enqueueMessage(
                     Text::sprintf('COM_PATCHTESTER_ERROR_TRUNCATING_TESTS_TABLE', $e->getMessage()),
                     'error'
                 );
@@ -101,7 +107,7 @@ class ResetController extends AbstractController
             if (count($backups)) {
                 foreach ($backups as $file) {
                     if (!File::delete(JPATH_COMPONENT . '/backups/' . $file)) {
-                        $this->getApplication()->enqueueMessage(
+                        $this->app->enqueueMessage(
                             Text::sprintf('COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE', JPATH_COMPONENT . '/backups/' . $file),
                             'error'
                         );
@@ -115,7 +121,7 @@ class ResetController extends AbstractController
                 $msg = Text::sprintf(
                     'COM_PATCHTESTER_RESET_HAS_ERRORS',
                     JPATH_COMPONENT . '/backups',
-                    Factory::getDbo()->replacePrefix('#__patchtester_tests')
+                    Factory::getApplication()->get('DatabaseDriver')->replacePrefix('#__patchtester_tests')
                 );
                 $type = 'warning';
             } else {
@@ -127,7 +133,7 @@ class ResetController extends AbstractController
             $type = 'error';
         }
 
-        $this->getApplication()->enqueueMessage($msg, $type);
-        $this->getApplication()->redirect(Route::_('index.php?option=com_patchtester', false));
+        $this->app->enqueueMessage($msg, $type);
+        $this->app->redirect(Route::_('index.php?option=com_patchtester', false));
     }
 }

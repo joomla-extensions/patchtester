@@ -7,16 +7,18 @@
  * @license    GNU General Public License version 2 or later
  */
 
-namespace Joomla\Component\Patchtester\Administrator\Github\Exception;
+namespace Joomla\Component\Patchtester\Administrator\Exception;
 
-use Joomla\CMS\Http\Response;
+use DomainException;
+use Exception;
+use Joomla\Http\Response;
 
 /**
  * Exception representing an unexpected response
  *
  * @since  3.0.0
  */
-class UnexpectedResponse extends \DomainException
+class UnexpectedResponse extends DomainException
 {
     /**
      * The Response object.
@@ -25,18 +27,23 @@ class UnexpectedResponse extends \DomainException
      * @since  3.0.0
      */
     private $response;
-/**
+
+    /**
      * Constructor
      *
-     * @param   Response    $response  The Response object.
-     * @param   string      $message   The Exception message to throw.
-     * @param   integer     $code      The Exception code.
-     * @param   \Exception  $previous  The previous exception used for the exception chaining.
+     * @param   Response        $response  The Response object.
+     * @param   string          $message   The Exception message to throw.
+     * @param   int             $code      The Exception code.
+     * @param   Exception|null  $previous  The previous exception used for the exception chaining.
      *
      * @since   3.0.0
      */
-    public function __construct(Response $response, $message = '', $code = 0, \Exception $previous = null)
-    {
+    public function __construct(
+        Response $response,
+        $message = '',
+        $code = 0,
+        Exception $previous = null
+    ) {
         parent::__construct($message, $code, $previous);
         $this->response = $response;
     }
@@ -48,7 +55,7 @@ class UnexpectedResponse extends \DomainException
      *
      * @since   3.0.0
      */
-    public function getResponse()
+    public function getResponse(): Response
     {
         return $this->response;
     }

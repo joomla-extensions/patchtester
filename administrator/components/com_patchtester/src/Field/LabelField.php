@@ -31,7 +31,8 @@ class LabelField extends ListField
      * @since  4.1.0
      */
     protected $type = 'Label';
-/**
+
+    /**
      * Build a list of available fields.
      *
      * @return  array  List of options
@@ -40,13 +41,18 @@ class LabelField extends ListField
      */
     public function getOptions(): array
     {
-        $db    = Factory::getContainer()->get('DatabaseDriver');
+        $db = Factory::getContainer()->get('DatabaseDriver');
         $query = $db->getQuery(true);
-        $query->select('DISTINCT(' . $db->quoteName('name') . ') AS ' . $db->quoteName('text'))
+        $query->select(
+            'DISTINCT(' . $db->quoteName('name') . ') AS ' . $db->quoteName(
+                'text'
+            )
+        )
             ->select($db->quoteName('name', 'value'))
             ->from($db->quoteName('#__patchtester_pulls_labels'))
             ->order($db->quoteName('name') . ' ASC');
         $options = $db->setQuery($query)->loadAssocList();
+
         return array_merge(parent::getOptions(), $options);
     }
 }

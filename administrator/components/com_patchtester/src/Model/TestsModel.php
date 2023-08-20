@@ -11,6 +11,8 @@ namespace Joomla\Component\Patchtester\Administrator\Model;
 
 // phpcs:disable PSR1.Files.SideEffects
 
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
@@ -19,7 +21,7 @@ namespace Joomla\Component\Patchtester\Administrator\Model;
  *
  * @since  2.0
  */
-class TestsModel extends AbstractModel
+class TestsModel extends BaseDatabaseModel
 {
     /**
      * Retrieves a list of applied patches
@@ -30,7 +32,7 @@ class TestsModel extends AbstractModel
      */
     public function getAppliedPatches(): array
     {
-        $db = $this->getDb();
+        $db = $this->getDatabase();
         $db->setQuery($db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__patchtester_tests'))
@@ -47,6 +49,6 @@ class TestsModel extends AbstractModel
      */
     public function truncateTable(): void
     {
-        $this->getDb()->truncateTable('#__patchtester_tests');
+        $this->getDatabase()->truncateTable('#__patchtester_tests');
     }
 }

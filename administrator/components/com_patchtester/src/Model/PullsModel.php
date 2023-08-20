@@ -14,6 +14,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedResponse;
+use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\Database\DatabaseQuery;
 use RuntimeException;
@@ -29,6 +30,8 @@ use RuntimeException;
  */
 class PullsModel extends ListModel
 {
+    use GithubCredentialsTrait;
+
     /**
      * The object context
      *
@@ -43,18 +46,18 @@ class PullsModel extends ListModel
      * @since  2.0
      */
     protected $sortFields = ['pulls.pull_id', 'pulls.title'];
+
     /**
      * Constructor.
      *
      * @param   array  $config  An optional associative array of configuration settings.
      *
-     * @since   4.0.0
      * @throws  Exception
      *
+     * @since   4.0.0
      */
     public function __construct($config = [])
     {
-        $config = [];
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
                 'applied',
@@ -63,10 +66,25 @@ class PullsModel extends ListModel
                 'draft',
                 'label',
                 'branch',
+
+                'pulls.title',
+                'pulls.pull_id',
             ];
         }
 
         parent::__construct($config);
+    }
+
+    protected function populateState($ordering = 'pulls.pull_id', $direction = 'DESC')
+    {
+        parent::populateState(
+            $ordering,
+            $direction
+        );
+
+        foreach ($this->getCredentials() as $name => $value) {
+            $this->state->set($name, $value);
+        }
     }
 
     /**
@@ -93,13 +111,13 @@ class PullsModel extends ListModel
             ->select($db->quoteName(['name', 'color']))
             ->from($db->quoteName('#__patchtester_pulls_labels'));
         array_walk($items, static function ($item) use ($db, $query) {
-
-                $query->clear('where');
+            $query->clear('where');
             $query->where($db->quoteName('pull_id') . ' = ' . $item->pull_id);
             $db->setQuery($query);
             $item->labels = $db->loadObjectList();
         });
         $this->cache[$store] = $items;
+
         return $this->cache[$store];
     }
 
@@ -118,11 +136,11 @@ class PullsModel extends ListModel
      */
     protected function getStoreId($id = '')
     {
-        // Add the list state to the store id.
         $id .= ':' . $this->getState()->get('list.start');
         $id .= ':' . $this->getState()->get('list.limit');
         $id .= ':' . $this->getState()->get('list.ordering');
         $id .= ':' . $this->getState()->get('list.direction');
+
         return md5($this->context . ':' . $id);
     }
 
@@ -135,11 +153,14 @@ class PullsModel extends ListModel
      *
      * @return  array  An array of results.
      *
-     * @since   2.0
      * @throws  RuntimeException
+     * @since   2.0
      */
-    protected function getList($query, int $limitstart = 0, int $limit = 0): array
-    {
+    protected function getList(
+        $query,
+        int $limitstart = 0,
+        int $limit = 0
+    ): array {
         return $this->getDatabase()->setQuery($query, $limitstart, $limit)
             ->loadObjectList();
     }
@@ -183,53 +204,68 @@ class PullsModel extends ListModel
         $query->select('pulls.*')
             ->select($db->quoteName('tests.id', 'applied'))
             ->from($db->quoteName('#__patchtester_pulls', 'pulls'))
-            ->leftJoin($db->quoteName('#__patchtester_tests', 'tests')
+            ->leftJoin(
+                $db->quoteName('#__patchtester_tests', 'tests')
                 . ' ON ' . $db->quoteName('tests.pull_id') . ' = '
-                . $db->quoteName('pulls.pull_id'));
+                . $db->quoteName('pulls.pull_id')
+            );
         $search = $this->getState()->get('filter.search');
 
         if (!empty($search)) {
             if (stripos($search, 'id:') === 0) {
-                $query->where($db->quoteName('pulls.pull_id') . ' = ' . (int) substr(
-                    $search,
-                    3
-                ));
+                $query->where(
+                    $db->quoteName('pulls.pull_id') . ' = ' . (int)substr(
+                        $search,
+                        3
+                    )
+                );
             } elseif (is_numeric($search)) {
-                $query->where($db->quoteName('pulls.pull_id') . ' = ' . (int) $search);
+                $query->where(
+                    $db->quoteName('pulls.pull_id') . ' = ' . (int)$search
+                );
             } else {
-                $query->where('(' . $db->quoteName('pulls.title') . ' LIKE ' . $db->quote('%' . $db->escape($search, true) . '%') . ')');
+                $query->where(
+                    '(' . $db->quoteName('pulls.title') . ' LIKE ' . $db->quote(
+                        '%' . $db->escape($search, true) . '%'
+                    ) . ')'
+                );
             }
         }
 
         $applied = $this->getState()->get('filter.applied');
         if (!empty($applied)) {
-        // Not applied patches have a NULL value, so build our value part of the query based on this
+            // Not applied patches have a NULL value, so build our value part of the query based on this
             $value = $applied === 'no' ? ' IS NULL' : ' = 1';
             $query->where($db->quoteName('applied') . $value);
         }
 
         $branch = $this->getState()->get('filter.branch');
         if (!empty($branch)) {
-            $query->where($db->quoteName('pulls.branch') . ' IN (' . implode(',', $db->quote($branch)) . ')');
+            $query->where(
+                $db->quoteName('pulls.branch') . ' IN (' . implode(
+                    ',',
+                    $db->quote($branch)
+                ) . ')'
+            );
         }
 
         $applied = $this->getState()->get('filter.rtc');
         if (!empty($applied)) {
-        // Not applied patches have a NULL value, so build our value part of the query based on this
+            // Not applied patches have a NULL value, so build our value part of the query based on this
             $value = $applied === 'no' ? '0' : '1';
             $query->where($db->quoteName('pulls.is_rtc') . ' = ' . $value);
         }
 
         $npm = $this->getState()->get('filter.npm');
         if (!empty($npm)) {
-        // Not applied patches have a NULL value, so build our value part of the query based on this
+            // Not applied patches have a NULL value, so build our value part of the query based on this
             $value = $npm === 'no' ? '0' : '1';
             $query->where($db->quoteName('pulls.is_npm') . ' = ' . $value);
         }
 
         $draft = $this->getState()->get('filter.draft');
         if (!empty($draft)) {
-        // Not applied patches have a NULL value, so build our value part of the query based on this
+            // Not applied patches have a NULL value, so build our value part of the query based on this
             $value = $draft === 'no' ? '0' : '1';
             $query->where($db->quoteName('pulls.is_draft') . ' = ' . $value);
         }
@@ -239,27 +275,43 @@ class PullsModel extends ListModel
         if (!empty($labels) && $labels[0] !== '') {
             $labelQuery
                 ->select($db->quoteName('pulls_labels.pull_id'))
-                ->select('COUNT(' . $db->quoteName('pulls_labels.name') . ') AS '
-                    . $db->quoteName('labelCount'))
-                ->from($db->quoteName(
-                    '#__patchtester_pulls_labels',
-                    'pulls_labels'
-                ))
-                ->where($db->quoteName('pulls_labels.name') . ' IN (' . implode(
-                    ',',
-                    $db->quote($labels)
-                ) . ')')
+                ->select(
+                    'COUNT(' . $db->quoteName('pulls_labels.name') . ') AS '
+                    . $db->quoteName('labelCount')
+                )
+                ->from(
+                    $db->quoteName(
+                        '#__patchtester_pulls_labels',
+                        'pulls_labels'
+                    )
+                )
+                ->where(
+                    $db->quoteName('pulls_labels.name') . ' IN (' . implode(
+                        ',',
+                        $db->quote($labels)
+                    ) . ')'
+                )
                 ->group($db->quoteName('pulls_labels.pull_id'));
-            $query->leftJoin('(' . $labelQuery->__toString() . ') AS ' . $db->quoteName('pulls_labels')
+            $query->leftJoin(
+                '(' . $labelQuery->__toString() . ') AS ' . $db->quoteName(
+                    'pulls_labels'
+                )
                 . ' ON ' . $db->quoteName('pulls_labels.pull_id') . ' = '
-                . $db->quoteName('pulls.pull_id'))
-                ->where($db->quoteName('pulls_labels.labelCount') . ' = ' . count($labels));
+                . $db->quoteName('pulls.pull_id')
+            )
+                ->where(
+                    $db->quoteName('pulls_labels.labelCount') . ' = ' . count(
+                        $labels
+                    )
+                );
         }
 
         $ordering  = $this->getState()->get('list.ordering', 'pulls.pull_id');
         $direction = $this->getState()->get('list.direction', 'DESC');
         if (!empty($ordering)) {
-            $query->order($db->escape($ordering) . ' ' . $db->escape($direction));
+            $query->order(
+                $db->escape($ordering) . ' ' . $db->escape($direction)
+            );
         }
 
         return $query;
@@ -296,12 +348,20 @@ class PullsModel extends ListModel
 
         try {
             // TODO - Option to configure the batch size
-            $batchSize = 100;
-            $pullsResponse = Helper::initializeGithub()->getOpenPulls($this->getState()->get('github_user'), $this->getState()->get('github_repo'), $page, $batchSize);
-            $pulls = json_decode($pullsResponse->body);
+            $batchSize     = 100;
+            $pullsResponse = Helper::initializeGithub()->getOpenPulls(
+                $this->getState()->get('github_user'),
+                $this->getState()->get('github_repo'),
+                $page,
+                $batchSize
+            );
+            $pulls         = json_decode($pullsResponse->body);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
-                Text::sprintf('COM_PATCHTESTER_ERROR_GITHUB_FETCH', $exception->getMessage()),
+                Text::sprintf(
+                    'COM_PATCHTESTER_ERROR_GITHUB_FETCH',
+                    $exception->getMessage()
+                ),
                 $exception->getCode(),
                 $exception
             );
@@ -332,7 +392,7 @@ class PullsModel extends ListModel
                         $matches[0]
                     );
                     preg_match('/\d+/', $pageSegment, $pages);
-                    $lastPage = (int) $pages[0];
+                    $lastPage = (int)$pages[0];
                 }
             }
         }
@@ -353,30 +413,38 @@ class PullsModel extends ListModel
                 if (strtolower($label->name) === 'rtc') {
                     $isRTC = true;
                 } elseif (
-                    in_array(strtolower($label->name), ['npm resource changed', 'composer dependency changed'], true)
+                    in_array(
+                        strtolower($label->name),
+                        ['npm resource changed', 'composer dependency changed'],
+                        true
+                    )
                 ) {
                     $isNPM = true;
                 }
 
                 $labels[] = implode(',', [
-                        (int) $pull->number,
-                        $this->getDatabase()->quote($label->name),
-                        $this->getDatabase()->quote($label->color),
-                    ]);
+                    (int)$pull->number,
+                    $this->getDatabase()->quote($label->name),
+                    $this->getDatabase()->quote($label->color),
+                ]);
             }
 
             // Build the data object to store in the database
             $pullData = [
-                (int) $pull->number,
-                $this->getDatabase()->quote(HTMLHelper::_('string.truncate', ($pull->title ?? ''), 150)),
-                $this->getDatabase()->quote(HTMLHelper::_('string.truncate', ($pull->body ?? ''), 100)),
+                (int)$pull->number,
+                $this->getDatabase()->quote(
+                    HTMLHelper::_('string.truncate', ($pull->title ?? ''), 150)
+                ),
+                $this->getDatabase()->quote(
+                    HTMLHelper::_('string.truncate', ($pull->body ?? ''), 100)
+                ),
                 $this->getDatabase()->quote($pull->html_url),
-                (int) $isRTC,
-                (int) $isNPM,
+                (int)$isRTC,
+                (int)$isNPM,
                 $this->getDatabase()->quote($branch),
                 ($pull->draft ? 1 : 0)
             ];
-            $data[] = implode(',', $pullData);
+            $data[]   = implode(',', $pullData);
         }
 
         // If there are no pulls to insert then bail, assume we're finished
@@ -385,15 +453,28 @@ class PullsModel extends ListModel
         }
 
         try {
-            $this->getDatabase()->setQuery($this->getDatabase()->getQuery(true)
+            $this->getDatabase()->setQuery(
+                $this->getDatabase()->getQuery(true)
                     ->insert('#__patchtester_pulls')
-                    ->columns(['pull_id', 'title', 'description', 'pull_url',
-                         'is_rtc', 'is_npm', 'branch', 'is_draft'])
-                    ->values($data));
+                    ->columns([
+                        'pull_id',
+                        'title',
+                        'description',
+                        'pull_url',
+                        'is_rtc',
+                        'is_npm',
+                        'branch',
+                        'is_draft'
+                    ])
+                    ->values($data)
+            );
             $this->getDatabase()->execute();
         } catch (RuntimeException $exception) {
             throw new RuntimeException(
-                Text::sprintf('COM_PATCHTESTER_ERROR_INSERT_DATABASE', $exception->getMessage()),
+                Text::sprintf(
+                    'COM_PATCHTESTER_ERROR_INSERT_DATABASE',
+                    $exception->getMessage()
+                ),
                 $exception->getCode(),
                 $exception
             );
@@ -401,10 +482,12 @@ class PullsModel extends ListModel
 
         if ($labels) {
             try {
-                $this->getDatabase()->setQuery($this->getDatabase()->getQuery(true)
+                $this->getDatabase()->setQuery(
+                    $this->getDatabase()->getQuery(true)
                         ->insert('#__patchtester_pulls_labels')
                         ->columns(['pull_id', 'name', 'color'])
-                        ->values($labels));
+                        ->values($labels)
+                );
                 $this->getDatabase()->execute();
             } catch (RuntimeException $exception) {
                 throw new RuntimeException(

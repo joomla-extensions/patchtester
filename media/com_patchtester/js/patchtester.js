@@ -10,7 +10,7 @@ if (typeof Joomla === 'undefined') {
 }
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    var submitPatch = document.querySelectorAll(".submitPatch");
+    const submitPatch = document.querySelectorAll(".submitPatch");
 
     /**
      * EventListener which listens on submitPatch Button,
@@ -21,9 +21,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
      */
     submitPatch.forEach(function (element) {
         element.addEventListener("click", function (event) {
-            var currentTarget = event.currentTarget;
-            var task = currentTarget.dataset.task
-            var id = currentTarget.dataset.id
+            const currentTarget = event.currentTarget;
+            const task = `${currentTarget.dataset.task}.${currentTarget.dataset.task}`
+            const id = parseInt(currentTarget.dataset.id)
 
             PatchTester.submitpatch(task, id);
         });

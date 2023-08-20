@@ -11,9 +11,9 @@ namespace Joomla\Component\Patchtester\Administrator\GitHub;
 
 use Joomla\CMS\Http\Http;
 use Joomla\CMS\Http\HttpFactory;
-use Joomla\CMS\Http\Response;
 use Joomla\CMS\Uri\Uri;
-use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedResponse;
+use Joomla\Component\Patchtester\Administrator\Exception\UnexpectedResponse;
+use Joomla\Http\Response;
 use Joomla\Registry\Registry;
 
 /**
@@ -30,18 +30,19 @@ class GitHub
      * @since  3.0.0
      */
     protected $options;
-/**
+    /**
      * The HTTP client object to use in sending HTTP requests.
      *
      * @var    Http
      * @since  3.0.0
      */
     protected $client;
-/**
+
+    /**
      * Constructor.
      *
-     * @param   Registry  $options  Connector options.
-     * @param   Http      $client   The HTTP client object.
+     * @param   Registry|null  $options  Connector options.
+     * @param   Http|null      $client   The HTTP client object.
      *
      * @since   3.0.0
      */
@@ -58,7 +59,7 @@ class GitHub
      *
      * @since   3.0.0
      */
-    public function getClient()
+    public function getClient(): Http
     {
         return $this->client;
     }
@@ -66,22 +67,27 @@ class GitHub
     /**
      * Get the diff for a pull request.
      *
-     * @param   string   $user    The name of the owner of the GitHub repository.
-     * @param   string   $repo    The name of the GitHub repository.
-     * @param   integer  $pullId  The pull request number.
+     * @param   string  $user    The name of the owner of the GitHub repository.
+     * @param   string  $repo    The name of the GitHub repository.
+     * @param   int     $pullId  The pull request number.
      *
      * @return  Response
      *
      * @since   3.0.0
      */
-    public function getDiffForPullRequest($user, $repo, $pullId)
-    {
-        // Build the request path.
-        $path = "/repos/$user/$repo/pulls/" . (int) $pullId;
-// Build the request headers.
-        $headers = array('Accept' => 'application/vnd.github.diff');
+    public function getDiffForPullRequest(
+        string $user,
+        string $repo,
+        int $pullId
+    ): Response {
+        $path = "/repos/$user/$repo/pulls/" . $pullId;
+
+        $headers  = ['Accept' => 'application/vnd.github.diff'];
         $prepared = $this->prepareRequest($path, 0, 0, $headers);
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
@@ -89,27 +95,28 @@ class GitHub
      *
      * This method will add appropriate pagination details if necessary and also prepend the API url to have a complete URL for the request.
      *
-     * @param   string   $path     Path to process
-     * @param   integer  $page     Page to request
-     * @param   integer  $limit    Number of results to return per page
-     * @param   array    $headers  The headers to send with the request
+     * @param   string  $path     Path to process
+     * @param   int     $page     Page to request
+     * @param   int     $limit    Number of results to return per page
+     * @param   array   $headers  The headers to send with the request
      *
      * @return  array  Associative array containing the prepared URL and request headers
      *
      * @since   3.0.0
      */
     protected function prepareRequest(
-        $path,
-        $page = 0,
-        $limit = 0,
-        array $headers = array()
-    ) {
+        string $path,
+        int $page = 0,
+        int $limit = 0,
+        array $headers = []
+    ): array {
         $url = $this->fetchUrl($path, $page, $limit);
+
         if ($token = $this->options->get('gh.token', false)) {
             $headers['Authorization'] = "token $token";
         }
 
-        return array('url' => $url, 'headers' => $headers);
+        return ['url' => $url, 'headers' => $headers];
     }
 
     /**
@@ -118,9 +125,9 @@ class GitHub
      * This method will add appropriate pagination details and basic authentication credentials if necessary
      * and also prepend the API url to have a complete URL for the request.
      *
-     * @param   string   $path   URL to inflect
-     * @param   integer  $page   Page to request
-     * @param   integer  $limit  Number of results to return per page
+     * @param   string  $path   URL to inflect
+     * @param   int     $page   Page to request
+     * @param   int     $limit  Number of results to return per page
      *
      * @return  string   The request URL.
      *
@@ -130,38 +137,39 @@ class GitHub
     {
         // Get a new Uri object using the API URL and given path.
         $uri = new Uri($this->options->get('api.url') . $path);
-// If we have a defined page number add it to the JUri object.
+        // If we have a defined page number add it to the JUri object.
         if ($page > 0) {
-            $uri->setVar('page', (int) $page);
+            $uri->setVar('page', (int)$page);
         }
 
         // If we have a defined items per page add it to the JUri object.
         if ($limit > 0) {
-            $uri->setVar('per_page', (int) $limit);
+            $uri->setVar('per_page', (int)$limit);
         }
 
-        return (string) $uri;
+        return (string)$uri;
     }
 
     /**
      * Process the response and return it.
      *
      * @param   Response  $response      The response.
-     * @param   integer   $expectedCode  The expected response code.
+     * @param   int       $expectedCode  The expected response code.
      *
      * @return  Response
      *
      * @throws  UnexpectedResponse
-     *@since   3.0.0
+     * @since   3.0.0
      */
-    protected function processResponse(Response $response, $expectedCode = 200)
-    {
+    protected function processResponse(
+        Response $response,
+        int $expectedCode = 200
+    ): Response {
         // Validate the response code.
         if ($response->code != $expectedCode) {
-// Decode the error response and throw an exception.
+            // Decode the error response and throw an exception.
             $body  = json_decode($response->body);
-            $error = isset($body->error) ? $body->error
-                : (isset($body->message) ? $body->message : 'Unknown Error');
+            $error = $body->error ?? ($body->message ?? 'Unknown Error');
 
             throw new UnexpectedResponse(
                 $response,
@@ -187,15 +195,17 @@ class GitHub
      */
     public function getFileContents($user, $repo, $path, $ref = null)
     {
-        $path = "/repos/$user/$repo/contents/$path";
+        $path     = "/repos/$user/$repo/contents/$path";
         $prepared = $this->prepareRequest($path);
         if ($ref) {
             $url = new Uri($prepared['url']);
             $url->setVar('ref', $ref);
-            $prepared['url'] = (string) $url;
+            $prepared['url'] = (string)$url;
         }
 
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
@@ -212,18 +222,22 @@ class GitHub
     public function getFilesForPullRequest($user, $repo, $pullId, $page = 1)
     {
         // Build the request path.
-        $path = "/repos/$user/$repo/pulls/" . (int) $pullId . '/files?page=' . $page;
+        $path     = "/repos/$user/$repo/pulls/" . (int)$pullId . '/files?page='
+            . $page;
         $prepared = $this->prepareRequest($path);
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
      * Get a list of the open issues for a repository.
      *
-     * @param   string   $user   The name of the owner of the GitHub repository.
-     * @param   string   $repo   The name of the GitHub repository.
-     * @param   integer  $page   The page number from which to get items.
-     * @param   integer  $limit  The number of items on a page.
+     * @param   string  $user   The name of the owner of the GitHub repository.
+     * @param   string  $repo   The name of the GitHub repository.
+     * @param   int     $page   The page number from which to get items.
+     * @param   int     $limit  The number of items on a page.
      *
      * @return  Response
      *
@@ -236,16 +250,19 @@ class GitHub
             $page,
             $limit
         );
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
      * Get a list of the open pull requests for a repository.
      *
-     * @param   string   $user   The name of the owner of the GitHub repository.
-     * @param   string   $repo   The name of the GitHub repository.
-     * @param   integer  $page   The page number from which to get items.
-     * @param   integer  $limit  The number of items on a page.
+     * @param   string  $user   The name of the owner of the GitHub repository.
+     * @param   string  $repo   The name of the GitHub repository.
+     * @param   int     $page   The page number from which to get items.
+     * @param   int     $limit  The number of items on a page.
      *
      * @return  Response
      *
@@ -258,7 +275,10 @@ class GitHub
             $page,
             $limit
         );
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
@@ -279,9 +299,9 @@ class GitHub
     /**
      * Get a single pull request.
      *
-     * @param   string   $user    The name of the owner of the GitHub repository.
-     * @param   string   $repo    The name of the GitHub repository.
-     * @param   integer  $pullId  The pull request number.
+     * @param   string  $user    The name of the owner of the GitHub repository.
+     * @param   string  $repo    The name of the GitHub repository.
+     * @param   int     $pullId  The pull request number.
      *
      * @return  Response
      *
@@ -290,9 +310,12 @@ class GitHub
     public function getPullRequest($user, $repo, $pullId)
     {
         // Build the request path.
-        $path = "/repos/$user/$repo/pulls/" . (int) $pullId;
+        $path     = "/repos/$user/$repo/pulls/" . (int)$pullId;
         $prepared = $this->prepareRequest($path);
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
@@ -305,7 +328,10 @@ class GitHub
     public function getRateLimit()
     {
         $prepared = $this->prepareRequest('/rate_limit');
-        return $this->processResponse($this->client->get($prepared['url'], $prepared['headers']));
+
+        return $this->processResponse(
+            $this->client->get($prepared['url'], $prepared['headers'])
+        );
     }
 
     /**
@@ -321,6 +347,7 @@ class GitHub
     public function setOption($key, $value)
     {
         $this->options->set($key, $value);
+
         return $this;
     }
 }
