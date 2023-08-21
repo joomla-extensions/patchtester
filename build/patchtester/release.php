@@ -77,7 +77,7 @@ $version = array(
     'main'      => $versionSubParts[0] . '.' . $versionSubParts[1],
     'release'   => $versionSubParts[0] . '.' . $versionSubParts[1] . '.' . $versionSubParts[2],
     'dev_devel' => $versionSubParts[2] . (!empty($versionParts[1]) ? '-' . $versionParts[1] : '') . (!empty($versionParts[2]) ? '-' . $versionParts[2] : ''),
-    'credate'   => date('d-F-Y'),
+    'credate'   => date('Y-m-d'),
 );
 
 // Prints version information.
