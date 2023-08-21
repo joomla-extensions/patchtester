@@ -16,7 +16,6 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "joomla/crowdin-sync": "dev-master",
         "squizlabs/php_codesniffer": "~3.0"
     },
     "autoload": {
