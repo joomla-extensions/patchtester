@@ -47,7 +47,7 @@ class FetchController extends BaseController
         try {
             $page = $session->get('com_patchtester_fetcher_page', 1);
             /** @var PullsModel $model */
-            $model = $this->app->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pulls', 'Administrator', ['ignore_request' => true]);
+            $model = $this->app->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pulls', 'Administrator');
 
             $status = $model->requestFromGithub($page);
         } catch (Exception $e) {

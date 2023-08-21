@@ -142,16 +142,16 @@ class PullModel extends BaseDatabaseModel
     {
         // Get the CIServer Registry
         $ciSettings = Helper::initializeCISettings();
-// Get the Github object
+        // Get the Github object
         $github = Helper::initializeGithub();
-// Retrieve pullData for sha later on.
+        // Retrieve pullData for sha later on.
         $pull = $this->retrieveGitHubData($github, $id);
         if ($pull->head->repo === null) {
             throw new RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
         }
 
         $sha = $pull->head->sha;
-// Create tmp folder if it does not exist
+        // Create tmp folder if it does not exist
         if (!file_exists($ciSettings->get('folder.temp'))) {
             Folder::create($ciSettings->get('folder.temp'));
         }
@@ -161,7 +161,7 @@ class PullModel extends BaseDatabaseModel
         $delLogPath    = $tempPath . '/' . $ciSettings->get('zip.log.name');
         $zipPath       = $tempPath . '/' . $ciSettings->get('zip.name');
         $serverZipPath = sprintf($ciSettings->get('zip.url'), $id);
-// Patch has already been applied
+        // Patch has already been applied
         if (file_exists($backupsPath)) {
             return false;
         }
@@ -172,7 +172,7 @@ class PullModel extends BaseDatabaseModel
             'userAgent',
             $version->getUserAgent('Joomla', true, false)
         );
-// Try to download the zip file
+        // Try to download the zip file
         try {
             $http   = HttpFactory::getHttp($httpOption);
             $result = $http->get($serverZipPath);
@@ -191,9 +191,9 @@ class PullModel extends BaseDatabaseModel
 
         // Assign to variable to avlod PHP notice "Indirect modification of overloaded property"
         $content = (string)$result->getBody();
-// Write the file to disk
+        // Write the file to disk
         File::write($zipPath, $content);
-// Check if zip folder could have been downloaded
+        // Check if zip folder could have been downloaded
         if (!file_exists($zipPath)) {
             throw new RuntimeException(
                 Text::_('COM_PATCHTESTER_ZIP_DOES_NOT_EXIST')
@@ -211,9 +211,9 @@ class PullModel extends BaseDatabaseModel
 
         // Remove zip to avoid get listing afterwards
         File::delete($zipPath);
-// Verify the composer autoloader for any invalid entries
+        // Verify the composer autoloader for any invalid entries
         if ($this->verifyAutoloader($tempPath) === false) {
-// There is something broken in the autoloader, clean up and go back
+            // There is something broken in the autoloader, clean up and go back
             Folder::delete($tempPath);
             throw new RuntimeException(
                 Text::_('COM_PATCHTESTER_PATCH_BREAKS_SITE')
@@ -233,7 +233,7 @@ class PullModel extends BaseDatabaseModel
         $files = str_replace(Path::clean($tempPath . '\\'), '', $files);
         $files = array_merge($files, $deletedFiles);
         Folder::create($backupsPath);
-// Moves existent files to backup and replace them or creates new one if they don't exist
+        // Moves existent files to backup and replace them or creates new one if they don't exist
         foreach ($files as $key => $file) {
             try {
                 $filePath = explode(DIRECTORY_SEPARATOR, Path::clean($file));
@@ -246,7 +246,7 @@ class PullModel extends BaseDatabaseModel
                 }
 
                 if (file_exists(JPATH_ROOT . '/' . $file)) {
-// Create directories if they don't exist until file
+                    // Create directories if they don't exist until file
                     if (!file_exists($backupsPath . '/' . $filePath)) {
                         Folder::create($backupsPath . '/' . $filePath);
                     }
@@ -258,7 +258,7 @@ class PullModel extends BaseDatabaseModel
                 }
 
                 if (file_exists($tempPath . '/' . $file)) {
-// Create directories if they don't exist until file
+                    // Create directories if they don't exist until file
                     if (!file_exists(JPATH_ROOT . '/' . $filePath)
                         || !is_dir(
                             JPATH_ROOT . '/' . $filePath
@@ -288,9 +288,9 @@ class PullModel extends BaseDatabaseModel
         // Clear temp folder and store applied patch in database
         Folder::delete($tempPath);
         $this->saveAppliedPatch($id, $files, $sha);
-// Update the autoloader file
+        // Update the autoloader file
         $this->namespaceMapper->create();
-// Change the media version
+        // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
 
