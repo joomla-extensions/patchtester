@@ -33,13 +33,10 @@ class Com_PatchtesterInstallerScript extends InstallerScript
     {
         $this->minimumJoomla = '4.0';
         $this->minimumPhp    = JOOMLA_MINIMUM_PHP;
-        $this->deleteFiles = array(
-            '/administrator/components/com_patchtester/PatchTester/View/Pulls/tmpl/default_errors.php',
-        );
-        $this->deleteFolders = array(
-            '/administrator/components/com_patchtester/PatchTester/Table',
+        $this->deleteFolders = [
+            '/administrator/components/com_patchtester/PatchTester',
             '/components/com_patchtester',
-        );
+        ];
         Factory::getApplication()
             ->getLanguage()
             ->load('com_patchtester.sys', JPATH_ADMINISTRATOR, null, true);

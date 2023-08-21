@@ -40,12 +40,14 @@
 	</media>
 	<administration>
 		<menu img="../media/com_patchtester/images/icon-16-patchtester.png" view="pulls">com_patchtester</menu>
-		<files folder="admin">
+		<files folder="administrator/components/com_patchtester">
 			<folder>backups</folder>
 			<folder>forms</folder>
 			<folder>install</folder>
 			<folder>language</folder>
-			<folder>PatchTester</folder>
+			<folder>services</folder>
+			<folder>src</folder>
+			<folder>tmpl</folder>
 			<folder>vendor</folder>
 			<filename>access.xml</filename>
 			<filename>config.xml</filename>
