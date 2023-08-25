@@ -569,7 +569,8 @@ class PullModel extends BaseDatabaseModel
 
                     if (
                         $file->action === 'modified'
-                        && !file_exists(JPATH_ROOT . '/' . $file->filename)) {
+                        && !file_exists(JPATH_ROOT . '/' . $file->filename)
+                    ) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_FILE_MODIFIED_DOES_NOT_EXIST_S',
@@ -881,9 +882,7 @@ class PullModel extends BaseDatabaseModel
                     }
 
                     // If folder is empty, remove it as well
-                    if (count(glob(JPATH_ROOT . '/' . $filePath . '/*'))
-                        === 0
-                    ) {
+                    if (count(glob(JPATH_ROOT . '/' . $filePath . '/*')) === 0) {
                         Folder::delete(JPATH_ROOT . '/' . $filePath);
                     }
                 } elseif (file_exists($backupsPath . '/' . $file)) {
@@ -1042,11 +1041,10 @@ class PullModel extends BaseDatabaseModel
 
                     break;
                 case 'renamed':
-                    $originalSrc = JPATH_COMPONENT . '/backups/' . md5(
-                            $file->originalFile
-                        ) . '.txt';
+                    $originalSrc = JPATH_COMPONENT . '/backups/' . md5($file->originalFile) . '.txt';
                     $newSrc      = JPATH_ROOT . '/' . $file->filename;
                     $dest        = JPATH_ROOT . '/' . $file->originalFile;
+
                     if (!File::copy($originalSrc, $dest)) {
                         throw new RuntimeException(
                             Text::sprintf(
