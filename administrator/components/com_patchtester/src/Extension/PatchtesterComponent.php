@@ -22,8 +22,7 @@ use Psr\Container\ContainerInterface;
  *
  * @since  4.0.0
  */
-class PatchtesterComponent extends MVCComponent
-    implements BootableExtensionInterface
+class PatchtesterComponent extends MVCComponent implements BootableExtensionInterface
 {
     /**
      * Booting the extension. This is the function to set up the environment of the extension like

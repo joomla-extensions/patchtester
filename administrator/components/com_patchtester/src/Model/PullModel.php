@@ -40,6 +40,7 @@ use stdClass;
 class PullModel extends BaseDatabaseModel
 {
     use GithubCredentialsTrait;
+
     /**
      * Array containing top level non-production folders
      *
@@ -54,6 +55,7 @@ class PullModel extends BaseDatabaseModel
             'tests',
             '.github',
         ];
+
     /**
      * Array containing non-production files
      *
@@ -172,6 +174,7 @@ class PullModel extends BaseDatabaseModel
             'userAgent',
             $version->getUserAgent('Joomla', true, false)
         );
+
         // Try to download the zip file
         try {
             $http   = HttpFactory::getHttp($httpOption);
@@ -275,6 +278,7 @@ class PullModel extends BaseDatabaseModel
             } catch (RuntimeException $exception) {
                 Folder::delete($tempPath);
                 Folder::move($backupsPath, $backupsPath . '_failed');
+
                 throw new RuntimeException(
                     Text::sprintf(
                         'COM_PATCHTESTER_FAILED_APPLYING_PATCH',
