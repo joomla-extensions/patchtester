@@ -20,6 +20,9 @@ use Joomla\CMS\Router\Route;
 
 HTMLHelper::_('stylesheet', 'com_patchtester/octicons.css', ['version' => '3.5.0', 'relative' => true]);
 HTMLHelper::_('script', 'com_patchtester/patchtester.js', ['version' => 'auto', 'relative' => true]);
+
+$listOrder = $this->escape($this->state->get('list.ordering'));
+$listDirn  = $this->escape($this->state->get('list.direction'));
 ?>
 <form action="<?php echo Route::_('index.php?option=com_patchtester&view=pulls'); ?>" method="post" name="adminForm" id="adminForm">
  <div class="row">
@@ -43,10 +46,10 @@ HTMLHelper::_('script', 'com_patchtester/patchtester.js', ['version' => 'auto', 
                          <thead>
                                 <tr>
                                    <th scope="col" style="width:5%" class="text-center">
-                                        <?php echo Text::_('COM_PATCHTESTER_PULL_ID'); ?>
+                                       <?php echo HTMLHelper::_('searchtools.sort', 'COM_PATCHTESTER_PULL_ID', 'pulls.pull_id', $listDirn, $listOrder); ?>
                                     </th>
                                   <th scope="col" style="min-width:100px">
-                                        <?php echo Text::_('JGLOBAL_TITLE'); ?>
+                                      <?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'pulls.title', $listDirn, $listOrder); ?>
                                    </th>
                                   <th scope="col" style="width:8%" class="d-none d-md-table-cell text-center">
                                         <?php echo Text::_('COM_PATCHTESTER_BRANCH'); ?>

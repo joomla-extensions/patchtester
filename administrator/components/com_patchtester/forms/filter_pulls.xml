@@ -86,6 +86,8 @@
 			name="fullordering"
 			type="list"
 			onchange="this.form.submit();"
+			default="pulls.pull_id DESC"
+			validate="options"
 		>
 			<option value="pulls.title ASC">JGLOBAL_TITLE_ASC</option>
 			<option value="pulls.title DESC">JGLOBAL_TITLE_DESC</option>

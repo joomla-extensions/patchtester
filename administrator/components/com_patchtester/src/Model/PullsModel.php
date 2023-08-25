@@ -39,6 +39,7 @@ class PullsModel extends ListModel
      * @since  2.0
      */
     protected $context;
+
     /**
      * Array of fields the list can be sorted on
      *
@@ -75,7 +76,7 @@ class PullsModel extends ListModel
         parent::__construct($config);
     }
 
-    protected function populateState($ordering = 'pulls.pull_id', $direction = 'DESC')
+    protected function populateState($ordering = null, $direction = null)
     {
         parent::populateState(
             $ordering,
@@ -307,6 +308,7 @@ class PullsModel extends ListModel
 
         $ordering  = $this->getState()->get('list.ordering', 'pulls.pull_id');
         $direction = $this->getState()->get('list.direction', 'DESC');
+
         if (!empty($ordering)) {
             $query->order(
                 $db->escape($ordering) . ' ' . $db->escape($direction)
