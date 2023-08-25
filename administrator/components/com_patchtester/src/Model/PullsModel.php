@@ -256,11 +256,10 @@ class PullsModel extends ListModel
             $query->where($db->quoteName('pulls.is_rtc') . ' = ' . $value);
         }
 
-        $npm = $this->getState()->get('filter.npm');
-        if (!empty($npm)) {
-            // Not applied patches have a NULL value, so build our value part of the query based on this
-            $value = $npm === 'no' ? '0' : '1';
-            $query->where($db->quoteName('pulls.is_npm') . ' = ' . $value);
+        $npm = $this->getState()->get('filter.npm', '');
+
+        if (strlen($npm) === 1) {
+            $query->where($db->quoteName('pulls.is_npm') . ' = ' . (int) $npm);
         }
 
         $draft = $this->getState()->get('filter.draft');
