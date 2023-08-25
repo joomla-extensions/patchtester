@@ -525,7 +525,9 @@ class PullModel extends BaseDatabaseModel
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
-                ), $exception->getCode(), $exception
+                ),
+                $exception->getCode(),
+                $exception
             );
         }
 
@@ -556,11 +558,7 @@ class PullModel extends BaseDatabaseModel
                 case 'modified':
                 case 'renamed':
                     // If the backup file already exists, we can't apply the patch
-                    if (file_exists(
-                        JPATH_COMPONENT . '/backups/' . md5($file->filename)
-                        . '.txt'
-                    )
-                    ) {
+                    if (file_exists(JPATH_COMPONENT . '/backups/' . md5($file->filename) . '.txt')) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_CONFLICT_S',
@@ -569,11 +567,9 @@ class PullModel extends BaseDatabaseModel
                         );
                     }
 
-                    if ($file->action === 'modified'
-                        && !file_exists(
-                            JPATH_ROOT . '/' . $file->filename
-                        )
-                    ) {
+                    if (
+                        $file->action === 'modified'
+                        && !file_exists(JPATH_ROOT . '/' . $file->filename)) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_FILE_MODIFIED_DOES_NOT_EXIST_S',
@@ -611,7 +607,9 @@ class PullModel extends BaseDatabaseModel
                             Text::sprintf(
                                 'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                                 $exception->getMessage()
-                            ), $exception->getCode(), $exception
+                            ),
+                            $exception->getCode(),
+                            $exception
                         );
                     }
 
@@ -624,16 +622,13 @@ class PullModel extends BaseDatabaseModel
             // We only create a backup if the file already exists
             if (
                 $file->action === 'deleted'
-                || (file_exists(JPATH_ROOT . '/' . $file->filename)
-                    && $file->action === 'modified')
-                || (file_exists(JPATH_ROOT . '/' . $file->originalFile)
-                    && $file->action === 'renamed')
+                || (file_exists(JPATH_ROOT . '/' . $file->filename) && $file->action === 'modified')
+                || (file_exists(JPATH_ROOT . '/' . $file->originalFile) && $file->action === 'renamed')
             ) {
-                $filename = $file->action === 'renamed' ? $file->originalFile
-                    : $file->filename;
+                $filename = $file->action === 'renamed' ? $file->originalFile : $file->filename;
                 $src      = JPATH_ROOT . '/' . $filename;
-                $dest     = JPATH_COMPONENT . '/backups/' . md5($filename)
-                    . '.txt';
+                $dest     = JPATH_COMPONENT . '/backups/' . md5($filename) . '.txt';
+
                 if (!File::copy(Path::clean($src), $dest)) {
                     throw new RuntimeException(
                         Text::sprintf(
@@ -648,11 +643,7 @@ class PullModel extends BaseDatabaseModel
             switch ($file->action) {
                 case 'modified':
                 case 'added':
-                    if (!File::write(
-                        Path::clean(JPATH_ROOT . '/' . $file->filename),
-                        $file->body
-                    )
-                    ) {
+                    if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
@@ -664,10 +655,7 @@ class PullModel extends BaseDatabaseModel
 
                     break;
                 case 'deleted':
-                    if (!File::delete(
-                        Path::clean(JPATH_ROOT . '/' . $file->filename)
-                    )
-                    ) {
+                    if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->filename))) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
@@ -679,10 +667,7 @@ class PullModel extends BaseDatabaseModel
 
                     break;
                 case 'renamed':
-                    if (!File::delete(
-                        Path::clean(JPATH_ROOT . '/' . $file->originalFile)
-                    )
-                    ) {
+                    if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->originalFile))) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
@@ -691,11 +676,7 @@ class PullModel extends BaseDatabaseModel
                         );
                     }
 
-                    if (!File::write(
-                        Path::clean(JPATH_ROOT . '/' . $file->filename),
-                        $file->body
-                    )
-                    ) {
+                    if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
                         throw new RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
@@ -741,10 +722,7 @@ class PullModel extends BaseDatabaseModel
             $id,
             $page
         );
-        $files         = array_merge(
-            $files,
-            json_decode($filesResponse->getBody(), false)
-        );
+        $files         = array_merge($files, json_decode($filesResponse->getBody(), false));
         $lastPage      = 1;
         $headers       = $filesResponse->getHeaders();
 
@@ -780,11 +758,11 @@ class PullModel extends BaseDatabaseModel
      */
     private function parseFileList(array $files): array
     {
-        $parsedFiles = array();
+        $parsedFiles = [];
         /*
-                * Check if the patch tester is running in a development environment
-                * If we are not in development, we'll need to check the exclusion lists
-                 */
+        * Check if the patch tester is running in a development environment
+        * If we are not in development, we'll need to check the exclusion lists
+        */
         $isDev = file_exists(JPATH_INSTALLATION . '/index.php');
         foreach ($files as $file) {
             if (!$isDev) {
