@@ -14,7 +14,8 @@ use Joomla\Registry\Registry;
  */
 trait GithubCredentialsTrait
 {
-    protected function getCredentials(): Registry {
+    protected function getCredentials(): Registry
+    {
         $state = new Registry();
         $params = ComponentHelper::getParams('com_patchtester');
         $state->set('github_user', $params->get('org', 'joomla'));

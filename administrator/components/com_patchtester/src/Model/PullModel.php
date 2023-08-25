@@ -183,7 +183,8 @@ class PullModel extends BaseDatabaseModel
             $result = null;
         }
 
-        if ($result === null
+        if (
+            $result === null
             || ($result->getStatusCode() !== 200
                 && $result->getStatusCode() !== 310)
         ) {
@@ -262,7 +263,8 @@ class PullModel extends BaseDatabaseModel
 
                 if (file_exists($tempPath . '/' . $file)) {
                     // Create directories if they don't exist until file
-                    if (!file_exists(JPATH_ROOT . '/' . $filePath)
+                    if (
+                        !file_exists(JPATH_ROOT . '/' . $filePath)
                         || !is_dir(
                             JPATH_ROOT . '/' . $filePath
                         )
@@ -323,7 +325,9 @@ class PullModel extends BaseDatabaseModel
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
-                ), $exception->getCode(), $exception
+                ),
+                $exception->getCode(),
+                $exception
             );
         }
 
@@ -349,7 +353,9 @@ class PullModel extends BaseDatabaseModel
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
-                ), $exception->getCode(), $exception
+                ),
+                $exception->getCode(),
+                $exception
             );
         }
 
@@ -384,10 +390,7 @@ class PullModel extends BaseDatabaseModel
         array_walk(
             $composerFiles,
             static function ($composerFile) use (&$filesToCheck, $path) {
-                if (file_exists(
-                        $path . '/libraries/vendor/composer/' . $composerFile
-                    ) === false
-                ) {
+                if (file_exists($path . '/libraries/vendor/composer/' . $composerFile) === false) {
                     return;
                 }
 
@@ -401,20 +404,20 @@ class PullModel extends BaseDatabaseModel
                         $autoload,
                         $match
                     );
+
                     if (!$resultMatch) {
                         return;
                     }
 
                     // Check if the class is already defined
-                    $autoloadClass = '\Composer\Autoload\ComposerStaticInit'
-                        . $match[1];
+                    $autoloadClass = '\Composer\Autoload\ComposerStaticInit' . $match[1];
+
                     if (class_exists($autoloadClass)) {
                         return;
                     }
 
-                    require_once $path
-                        . '/libraries/vendor/composer/autoload_static.php';
-                    // Get all the files
+                    require_once $path . '/libraries/vendor/composer/autoload_static.php';
+
                     $files        = $autoloadClass::$files;
                     $filesToCheck = array_merge($filesToCheck, $files);
                 } else {
@@ -434,13 +437,14 @@ class PullModel extends BaseDatabaseModel
      * @param   array   $files  The list of files to check
      * @param   string  $path   The path where the temporary patch resides
      *
-     * @return  boolean  True if all files exist | False otherwise.
+     * @return  bool  True if all files exist | False otherwise.
      *
      * @since   4.0.0
      */
     private function checkFilesExist(array $files, string $path): bool
     {
         $path = Path::clean($path);
+
         foreach ($files as $file) {
             if (is_array($file)) {
                 $this->checkFilesExist($file, $path);
