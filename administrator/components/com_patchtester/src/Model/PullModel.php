@@ -12,6 +12,8 @@ namespace Joomla\Component\Patchtester\Administrator\Model;
 use Joomla\Archive\Zip;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
@@ -22,8 +24,6 @@ use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedRespon
 use Joomla\Component\Patchtester\Administrator\GitHub\GitHub;
 use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
-use Joomla\Filesystem\File;
-use Joomla\Filesystem\Folder;
 use Joomla\Registry\Registry;
 use RuntimeException;
 use stdClass;

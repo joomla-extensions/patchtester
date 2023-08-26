@@ -11,6 +11,7 @@ namespace Joomla\Component\Patchtester\Administrator\Controller;
 
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -18,7 +19,6 @@ use Joomla\CMS\Router\Route;
 use Joomla\Component\Patchtester\Administrator\Model\PullModel;
 use Joomla\Component\Patchtester\Administrator\Model\PullsModel;
 use Joomla\Component\Patchtester\Administrator\Model\TestsModel;
-use Joomla\Filesystem\File;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
