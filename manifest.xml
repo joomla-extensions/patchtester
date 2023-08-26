@@ -39,13 +39,13 @@
 		<description>Joomla! CMS Patch Tester Component</description>
 		<element>com_patchtester</element>
 		<type>component</type>
-		<version>4.3.0</version>
+		<version>4.3.1</version>
 		<client>administrator</client>
-		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.3.0</infourl>
+		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.3.1</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.3.0/com_patchtester_4.3.0.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.3.1/com_patchtester_4.3.1.zip</downloadurl>
 		</downloads>
-		<sha384>0f8f2f7b02de8a3ec851b42576fe7c450f4ac0e2509b1cad62962788cecec73f8d38114ce3bb155119a79a78c4a24ceb</sha384>
+		<sha384>595626de4bf6e50e8fc0e7e46bdd70868b560add57c415dd3232823a05f5010011104219c66e24706ded7661843c3094</sha384>
 		<tags>
 			<tag>stable</tag>
 		</tags>
