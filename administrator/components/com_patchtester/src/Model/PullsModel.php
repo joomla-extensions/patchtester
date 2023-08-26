@@ -372,8 +372,7 @@ class PullsModel extends ListModel
         if ($page === 1) {
             // Default this to being a single page of results
             $lastPage = 1;
-            if (isset($pullsResponse->headers['link'])) {
-                $linkHeader = $pullsResponse->headers['link'];
+            if ($linkHeader = $pullsResponse->getHeader('link')) {
                 // The `joomla/http` 2.0 package uses PSR-7 Responses which has a different format for headers, check for this
                 if (is_array($linkHeader)) {
                     $linkHeader = $linkHeader[0];
