@@ -23,7 +23,7 @@ use Joomla\Component\Patchtester\Administrator\GitHub\GitHub;
 use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\CMS\Filesystem
-use Joomla\Filesystem\Folder;
+use Joomla\CMS\Filesystem\Folder
 use Joomla\Registry\Registry;
 use RuntimeException;
 use stdClass;
