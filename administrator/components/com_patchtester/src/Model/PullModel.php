@@ -22,7 +22,7 @@ use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedRespon
 use Joomla\Component\Patchtester\Administrator\GitHub\GitHub;
 use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
-use Joomla\CMS\Filesystem
+use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder
 use Joomla\Registry\Registry;
 use RuntimeException;
