@@ -18,7 +18,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\Component\Patchtester\Administrator\Model\PullModel;
 use Joomla\Component\Patchtester\Administrator\Model\PullsModel;
 use Joomla\Component\Patchtester\Administrator\Model\TestsModel;
-use Joomla\Filesystem\File;
+use Joomla\CMS\Filesystem
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
