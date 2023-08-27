@@ -78,7 +78,7 @@ class PatchFetcher {
             // Send another request
             this.request('fetch');
           } else {
-            document.getElementById('rogress').remove();
+            document.getElementById('progress').remove();
             document.getElementById('modal-sync  button.btn-close', window.parent.document).click();
           }
         } catch (error) {
