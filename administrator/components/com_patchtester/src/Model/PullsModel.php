@@ -17,6 +17,7 @@ use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedRespon
 use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\Database\DatabaseQuery;
+use Joomla\Database\ParameterType;
 use RuntimeException;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -210,20 +211,15 @@ class PullsModel extends ListModel
                 . ' ON ' . $db->quoteName('tests.pull_id') . ' = '
                 . $db->quoteName('pulls.pull_id')
             );
-        $search = $this->getState()->get('filter.search');
 
-        if (!empty($search)) {
+        if ($search = $this->getState()->get('filter.search')) {
             if (stripos($search, 'id:') === 0) {
-                $query->where(
-                    $db->quoteName('pulls.pull_id') . ' = ' . (int)substr(
-                        $search,
-                        3
-                    )
-                );
+                $search = (int) substr($search, 3);
+                $query->where($db->quoteName('pulls.pull_id') . ' = :pullid')
+                    ->bind(':pullid', $search);
             } elseif (is_numeric($search)) {
-                $query->where(
-                    $db->quoteName('pulls.pull_id') . ' = ' . (int)$search
-                );
+                $query->where($db->quoteName('pulls.pull_id') . ' = :pullid')
+                    ->bind(':pullid', $search);
             } else {
                 $query->where(
                     '(' . $db->quoteName('pulls.title') . ' LIKE ' . $db->quote(
@@ -234,40 +230,33 @@ class PullsModel extends ListModel
         }
 
         $applied = $this->getState()->get('filter.applied');
-        if (!empty($applied)) {
+        if (is_numeric($applied)) {
             // Not applied patches have a NULL value, so build our value part of the query based on this
-            $value = $applied === 'no' ? ' IS NULL' : ' = 1';
+            $value = $applied === '0' ? ' IS NULL' : ' = 1';
             $query->where($db->quoteName('applied') . $value);
         }
 
         $branch = $this->getState()->get('filter.branch');
         if (!empty($branch)) {
-            $query->where(
-                $db->quoteName('pulls.branch') . ' IN (' . implode(
-                    ',',
-                    $db->quote($branch)
-                ) . ')'
-            );
+            $query->whereIn($db->quoteName('pulls.branch'), (array) $branch, ParameterType::STRING);
         }
 
-        $applied = $this->getState()->get('filter.rtc');
-        if (!empty($applied)) {
-            // Not applied patches have a NULL value, so build our value part of the query based on this
-            $value = $applied === 'no' ? '0' : '1';
-            $query->where($db->quoteName('pulls.is_rtc') . ' = ' . $value);
+        $rtc = $this->getState()->get('filter.rtc');
+        if (is_numeric($rtc)) {
+            $query->where($db->quoteName('pulls.is_rtc') . ' = :rtc')
+                ->bind(':rtc', $rtc);
         }
 
         $npm = $this->getState()->get('filter.npm', '');
-
-        if (strlen($npm) === 1) {
-            $query->where($db->quoteName('pulls.is_npm') . ' = ' . (int) $npm);
+        if (is_numeric($npm)) {
+            $query->where($db->quoteName('pulls.is_npm') . ' = :npm')
+                ->bind(':npm', $npm);
         }
 
         $draft = $this->getState()->get('filter.draft');
-        if (!empty($draft)) {
-            // Not applied patches have a NULL value, so build our value part of the query based on this
-            $value = $draft === 'no' ? '0' : '1';
-            $query->where($db->quoteName('pulls.is_draft') . ' = ' . $value);
+        if (is_numeric($draft)) {
+            $query->where($db->quoteName('pulls.is_draft') . ' = :draft')
+                ->bind(':draft', $draft);
         }
 
         $labels = $this->getState()->get('filter.label');
