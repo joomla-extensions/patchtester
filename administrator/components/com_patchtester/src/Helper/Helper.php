@@ -38,7 +38,7 @@ abstract class Helper
         $params = ComponentHelper::getParams('com_patchtester');
         $options = new Registry();
         // Set a user agent for the request
-        $options->set('userAgent', 'PatchTester/3.0');
+        $options->set('userAgent', 'PatchTester/4.0');
         // Set the default timeout to 120 seconds
         $options->set('timeout', 120);
         // Set the API URL
