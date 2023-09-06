@@ -10,41 +10,38 @@ if (typeof Joomla === 'undefined') {
 }
 
 const defaultSettings = {
-    offset: 0,
-    progress: 0,
+    progress: null,
     lastPage: null,
     baseURL: `${Joomla.getOptions('system.paths').baseFull}index.php?option=com_patchtester&tmpl=component&format=json`,
-    lastPage: null,
 };
 
 class PatchFetcher {
   constructor(settings = defaultSettings) {
     this.url = new URL(settings.baseURL);
-    this.offset = settings.offset;
     this.progress = settings.progress;
     this.lastPage = settings.lastPage;
 
     this.progressBar = document.getElementById('progress-bar');
-
-    this.url.searchParams.append(document.querySelector('#patchtester-token').getAttribute('name'), 1);
-    this.url.searchParams.append('task', `${task}.${task}`);
+    this.url.searchParams.append(document.getElementById('patchtester-token').getAttribute('name'), 1);
 
     this.request('startfetch');
   }
 
-  request() {
-    Joomla.request({
-      url: path.toString(),
-      method: 'GET',
-      perform: true,
-      data: `task=${task}.${task}`,
+  request(task) {
+    this.url.searchParams.append('task', `${task}.${task}`);
 
+    Joomla.request({
+      url: this.url.toString(),
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      perform: true,
       onSuccess: (response) => {
+        response = JSON.parse(response)
         try {
           if (response === null || response.error || response.success === false) {
             throw response;
           }
-
+          // {"success":true,"message":"Processing page 1 of GitHub data","messages":null,"data":{"complete":false,"header":"Processing data from GitHub"}}
           // Store the last page if it is part of this request and not a boolean false
           if (typeof response.data.lastPage !== 'undefined' && response.data.lastPage !== false) {
             this.lastPage = response.data.lastPage;
@@ -54,17 +51,17 @@ class PatchFetcher {
           if (typeof response.data.page !== 'undefined') {
             this.progress = (response.data.page / this.lastPage) * 100;
 
-            if (progress < 100) {
-              this.progressBar.style.width = `${progress}%`;
-              this.progressBar.setAttribute('aria-valuenow', progress);
+            if (this.progress < 100) {
+              this.progressBar.style.width = `${this.progress}%`;
+              this.progressBar.setAttribute('aria-valuenow', this.progress);
             } else {
               // Both BS2 and BS4 classes are targeted to keep this script simple
               this.progressBar.classList.remove(['bar-success', 'bg-success']);
               this.progressBar.classList.remove(['bar-warning', 'bg-warning']);
-              this.progressBar.style.width = `${progress}%`;
+              this.progressBar.style.width = `${this.progress}%`;
               this.progressBar.setAttribute('aria-valuemin', 100);
               this.progressBar.setAttribute('aria-valuemax', 200);
-              this.progressBar.setAttribute('aria-valuenow', progress);
+              this.progressBar.setAttribute('aria-valuenow', this.progress);
             }
           }
 
@@ -75,11 +72,12 @@ class PatchFetcher {
           }
 
           if (!response.data.complete) {
-            // Send another request
+            this.url.searchParams.append(document.querySelector('#patchtester-token').getAttribute('name'), 1);
+            this.url.searchParams.append('task', `${task}.${task}`);
             this.request('fetch');
           } else {
             document.getElementById('progress').remove();
-            document.getElementById('modal-sync  button.btn-close', window.parent.document).click();
+            window.parent.document.querySelector('#modal-sync button.btn-close').click();
           }
         } catch (error) {
           try {
