@@ -11,15 +11,17 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\WebAsset\WebAssetManager;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-/** @var  \Joomla\Component\Patchtester\Administrator\View\Pulls\PullsHtmlView  $this */
+/** @var  \Joomla\Component\Patchtester\Administrator\View\Pulls\HtmlView  $this */
 
-HTMLHelper::_('stylesheet', 'com_patchtester/octicons.css', ['version' => '3.5.0', 'relative' => true]);
-HTMLHelper::_('script', 'com_patchtester/patchtester.js', ['version' => 'auto', 'relative' => true]);
+/** @var WebAssetManager $wa */
+$wa = $this->document->getWebAssetManager();
+$wa->usePreset('com_patchtester.patchtester');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));

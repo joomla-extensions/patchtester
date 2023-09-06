@@ -10,14 +10,18 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\WebAsset\WebAssetManager;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-HTMLHelper::_('jquery.framework');
+/** @var WebAssetManager $wa */
+$wa = $this->document->getWebAssetManager();
+$wa->useScript('com_patchtester.admin-fetcher-modal');
+
 HTMLHelper::_('behavior.core');
-HTMLHelper::_('script', 'com_patchtester/fetcher.js', ['version' => 'auto', 'relative' => true]);
+//HTMLHelper::_('script', 'com_patchtester/fetcher.js', ['version' => 'auto', 'relative' => true]);
 Text::script('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED');
 
 ?>

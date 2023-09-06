@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "com_patchtester",
+  "version": "4.3.2",
+  "description": "Joomla CMS",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "com_patchtester.admin-fetcher-modal",
+      "type": "script",
+      "uri": "com_patchtester/fetcher.js",
+      "attributes": {
+        "type": "module",
+        "defer": true
+      }
+    },
+    {
+      "name": "com_patchtester.patchtester",
+      "type": "script",
+      "uri": "com_patchtester/patchtester.js",
+      "attributes": {
+        "type": "module",
+        "defer": true
+      }
+    },
+    {
+      "name": "com_patchtester.octicons",
+      "type": "style",
+      "uri": "com_patchtester/octicons.css"
+    },
+    {
+      "name": "com_patchtester.patchtester",
+      "type": "preset",
+      "dependencies": [
+        "com_patchtester.patchtester#script",
+        "com_patchtester.octicons#style"
+      ]
+    }
+  ]
+}
