@@ -22,9 +22,8 @@ const PatchTester = {
    * @param {String} task The task to perform
    * @param {Number} id   The item ID
    */
-  submitpatch: function (task, id) {
-    var idField = document.getElementById('pull_id');
-    idField.value = id;
+  submitpatch: (task, id) => {
+    document.getElementById('pull_id')?.value = id;
 
     Joomla.submitform(task);
   }
@@ -37,13 +36,7 @@ const PatchTester = {
  *
  * @param {Event} event
  */
-function patchSubmit(event) {
-  const currentTarget = event.currentTarget;
-  const task = `${currentTarget.dataset.task}.${currentTarget.dataset.task}`
-  const id = parseInt(currentTarget.dataset.id)
-  
-  PatchTester.submitpatch(task, id);
-}
+const patchSubmit = (event) => PatchTester.submitpatch(`${event.currentTarget.dataset.task}.${currentTarget.dataset.task}`, parseInt(event.currentTarget.dataset.id));
 
 
 document.querySelectorAll(".submitPatch").forEach((element) => element.addEventListener("click", patchSubmit));
