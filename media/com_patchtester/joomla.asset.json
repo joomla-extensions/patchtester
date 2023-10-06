@@ -10,8 +10,7 @@
       "type": "script",
       "uri": "com_patchtester/fetcher.js",
       "attributes": {
-        "type": "module",
-        "defer": true
+        "type": "module"
       }
     },
     {
@@ -19,8 +18,7 @@
       "type": "script",
       "uri": "com_patchtester/patchtester.js",
       "attributes": {
-        "type": "module",
-        "defer": true
+        "type": "module"
       }
     },
     {
