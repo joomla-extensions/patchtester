@@ -82,7 +82,7 @@ class PatchFetcher {
         } catch (error) {
           try {
             if (response.error || response.success === false) {
-              document.getElementById('patchtester-progress-header').innerText(Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED'));
+              document.getElementById('patchtester-progress-header').innerText = Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED');
               document.getElementById('patchtester-progress-message').innerHTML = Joomla.sanitizeHtml(response.message);
             }
           } catch (ignore) {
@@ -90,7 +90,7 @@ class PatchFetcher {
               error = Joomla.JText._('COM_PATCHTESTER_NO_ERROR_RETURNED');
             }
 
-            document.getElementById('patchtester-progress-header').innerText(Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED'));
+            document.getElementById('patchtester-progress-header').innerText = Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED');
             document.getElementById('patchtester-progress-message').innerHTML = Joomla.sanitizeHtml(error);
             document.getElementById('progress').remove();
           }
@@ -99,7 +99,7 @@ class PatchFetcher {
       },
       onError: (jqXHR) => {
         const json = (typeof jqXHR === 'object' && jqXHR.responseText) ? jqXHR.responseText : null;
-        document.getElementById('patchtester-progress-header').innerText(Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED'));
+        document.getElementById('patchtester-progress-header').innerText = Joomla.JText._('COM_PATCHTESTER_FETCH_AN_ERROR_HAS_OCCURRED');
         document.getElementById('patchtester-progress-message').innerHTML = Joomla.sanitizeHtml(json);
         document.getElementById('progress').remove();
       }
