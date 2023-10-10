@@ -23,11 +23,12 @@ Joomla.submitbutton = (task) => {
  * @param {Event} event
  */
 document.querySelectorAll(".submitPatch").forEach((element) => element.addEventListener("click", (event) => {
-  const value = document.getElementById('pull_id')?.value;
+  const element = document.getElementById('pull_id');
+  const target = event.currentTarget;
   
-  if (value) {
-    value = parseInt(event.currentTarget.dataset.id);
+  if (element) {
+    element.value = parseInt(target.dataset.id);
   }
 
-  Joomla.submitform(`${event.currentTarget.dataset.task}.${currentTarget.dataset.task}`);
+  Joomla.submitform(`${target.dataset.task}.${target.dataset.task}`);
 }));
