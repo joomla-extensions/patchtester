@@ -1,8 +1,8 @@
 /**
  * Patch testing component for the Joomla! CMS
  *
- * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2018 Open Source Matters, Inc. All rights reserved.
- * @license    GNU General Public License version 2 or later
+ * @copyright   (C) 2023 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 if (typeof Joomla === 'undefined') {
@@ -15,24 +15,6 @@ Joomla.submitbutton = (task) => {
   }
 };
 
-const PatchTester = {
-  /**
-   * Process the patch action
-   *
-   * @param {String} task The task to perform
-   * @param {Number} id   The item ID
-   */
-  submitpatch: (task, id) => {
-    const value = document.getElementById('pull_id')?.value;
-    
-    if (value) {
-      value = id;
-    }
-
-    Joomla.submitform(task);
-  }
-};
-
 /**
  * EventListener which listens on submitPatch Button,
  * checks if it is an apply or revert method and
@@ -40,7 +22,12 @@ const PatchTester = {
  *
  * @param {Event} event
  */
-const patchSubmit = (event) => PatchTester.submitpatch(`${event.currentTarget.dataset.task}.${currentTarget.dataset.task}`, parseInt(event.currentTarget.dataset.id));
+document.querySelectorAll(".submitPatch").forEach((element) => element.addEventListener("click", (event) => {
+  const value = document.getElementById('pull_id')?.value;
+  
+  if (value) {
+    value = parseInt(event.currentTarget.dataset.id);
+  }
 
-
-document.querySelectorAll(".submitPatch").forEach((element) => element.addEventListener("click", patchSubmit));
+  Joomla.submitform(`${event.currentTarget.dataset.task}.${currentTarget.dataset.task}`);
+}));
