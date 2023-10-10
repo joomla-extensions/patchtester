@@ -23,7 +23,11 @@ const PatchTester = {
    * @param {Number} id   The item ID
    */
   submitpatch: (task, id) => {
-    document.getElementById('pull_id')?.value = id;
+    const value = document.getElementById('pull_id')?.value;
+    
+    if (value) {
+      value = id;
+    }
 
     Joomla.submitform(task);
   }
