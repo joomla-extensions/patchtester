@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later</license>
 	<authorEmail>admin@joomla.org</authorEmail>
 	<authorUrl>https://www.joomla.org</authorUrl>
-	<version>4.3.2</version>
+	<version>4.3.3</version>
 	<description>COM_PATCHTESTER_XML_DESCRIPTION</description>
 	<namespace path="src">Joomla\Component\Patchtester</namespace>
 	<scriptfile>script.php</scriptfile>
@@ -37,6 +37,7 @@
 		<folder>fonts</folder>
 		<folder>images</folder>
 		<folder>js</folder>
+		<file>joomla.asset.json</file>
 	</media>
 	<administration>
 		<menu img="../media/com_patchtester/images/icon-16-patchtester.png" view="pulls">com_patchtester</menu>
