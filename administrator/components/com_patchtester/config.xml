@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-
+	<help key="Components_Patch_Tester_Options"/>
 	<fieldset
 			name="repositories"
 			label="COM_PATCHTESTER_FIELDSET_REPOSITORIES_LABEL"
