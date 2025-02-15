@@ -20,7 +20,7 @@ use Joomla\CMS\WebAsset\WebAssetManager;
 /** @var  \Joomla\Component\Patchtester\Administrator\View\Pulls\HtmlView  $this */
 
 /** @var WebAssetManager $wa */
-$wa = $this->document->getWebAssetManager();
+$wa = $this->getDocument()->getWebAssetManager();
 $wa->usePreset('com_patchtester.patchtester');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
