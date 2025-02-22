@@ -51,4 +51,21 @@
 		</tags>
 		<targetplatform name="joomla" version="[45].[01234]" />
 	</update>
+	<update>
+		<name>Patch Tester Component</name>
+		<description>Joomla! CMS Patch Tester Component</description>
+		<element>com_patchtester</element>
+		<type>component</type>
+		<version>4.4.0</version>
+		<client>administrator</client>
+		<infourl title="Patch Tester Component">https://github.com/joomla-extensions/patchtester/releases/tag/4.4.0</infourl>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/4.4.0/com_patchtester_4.4.0.zip</downloadurl>
+		</downloads>
+		<sha384>ff03245cf16e5bcfcc6124b1c5422b88fdd7eb4cbe6a554a5d5ac0f9cb5dab3afa415298c99a70145e46f46787bb3c38</sha384>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<targetplatform name="joomla" version="[45].[01234]" />
+	</update>
 </updates>
