@@ -73,21 +73,27 @@ foreach ($this->items as $i => $item) :
                     switch (strtolower($label->name)) {
                         case 'a11y':
                         case 'conflicting files':
+                        case 'code review':
                         case 'documentation required':
+                        case 'enhancement':
+                        case 'feature':
                         case 'information required':
                         case 'j3 issue':
                         case 'language change':
+                        case 'maintainers checked':
                         case 'mysql 5.7':
                         case 'needs new owner':
                         case 'no code attached yet':
                         case 'pbf':
-                        case 'pr-3.9-dev':
-                        case 'pr-3.10-dev':
-                        case 'pr-4.1-dev':
+                        case 'pr-5.1-dev':
+                        case 'pr-5.2-dev':
+                        case 'pr-5.3-dev':
+                        case 'pr-6.0-dev':
                         case 'pr-i10n_4.0-dev':
                         case 'pr-staging':
                         case 'release blocker':
                         case 'rfc':
+                        case 'small':
                         case 'test instructions missing':
                         case 'updates requested':
                             $textColor = '000000';
