@@ -131,7 +131,7 @@ class HtmlView extends BaseHtmlView
     {
         ToolbarHelper::title(Text::_('COM_PATCHTESTER'), 'patchtester fas fa-save');
         if (!count($this->envErrors)) {
-            $toolbar = Toolbar::getInstance('toolbar');
+            $toolbar = $this->getDocument()->getToolbar();
             $toolbar->appendButton('Popup', 'sync', 'COM_PATCHTESTER_TOOLBAR_FETCH_DATA', 'index.php?option=com_patchtester&view=fetch&task=fetch&tmpl=component', 500, 210, 0, 0, 'window.parent.location.reload()', Text::_('COM_PATCHTESTER_HEADING_FETCH_DATA'));
             $toolbar->appendButton('Standard', 'expired', 'COM_PATCHTESTER_TOOLBAR_RESET', 'reset.reset', false);
         }
