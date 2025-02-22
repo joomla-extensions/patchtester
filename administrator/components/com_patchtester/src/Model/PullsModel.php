@@ -13,7 +13,7 @@ use Exception;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\ListModel;
-use Joomla\Component\Patchtester\Administrator\Github\Exception\UnexpectedResponse;
+use Joomla\Component\Patchtester\Administrator\Exception\UnexpectedResponse;
 use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\Database\DatabaseQuery;

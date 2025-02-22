@@ -13,7 +13,7 @@ use Joomla\CMS\Language\Text;
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-/** @var  \Joomla\Component\Patchtester\Administrator\View\Pulls\PullsHtmlView  $this */
+/** @var  \Joomla\Component\Patchtester\Administrator\View\Pulls\HtmlView  $this */
 ?>
 <h3><?php echo Text::_('COM_PATCHTESTER_REQUIREMENTS_HEADING'); ?></h3>
 <p><?php echo Text::_('COM_PATCHTESTER_REQUIREMENTS_NOT_MET'); ?></p>
