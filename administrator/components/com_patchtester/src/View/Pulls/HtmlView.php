@@ -10,6 +10,7 @@
 namespace Joomla\Component\Patchtester\Administrator\View\Pulls;
 
 use Exception;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
@@ -33,61 +34,74 @@ use Joomla\Registry\Registry;
 class HtmlView extends BaseHtmlView
 {
     /**
-     * Array containing environment errors
-     *
-     * @var    array
-     * @since  2.0
-     */
-    protected $envErrors = [];
-/**
-     * Array of open pull requests
-     *
-     * @var    array
-     * @since  2.0
-     */
-    protected $items;
-/**
-     * Pagination object
-     *
-     * @var    Pagination
-     * @since  2.0
-     */
-    protected $pagination;
-/**
      * Form object for search filters
      *
      * @var   Form
      * @since 4.1.0
      */
     public $filterForm;
-/**
+
+    /**
      * The active search filters
      *
      * @var   array
      * @since 4.1.0
      */
     public $activeFilters;
-/**
+
+    /**
+     * Array containing environment errors
+     *
+     * @var    array
+     * @since  2.0
+     */
+    protected $envErrors = [];
+
+    /**
+     * Array of open pull requests
+     *
+     * @var    array
+     * @since  2.0
+     */
+    protected $items;
+
+    /**
+     * Pagination object
+     *
+     * @var    Pagination
+     * @since  2.0
+     */
+    protected $pagination;
+
+    /**
      * The model state
      *
      * @var    Registry
      * @since  2.0.0
      */
     protected $state;
-/**
+
+    /**
      * The issue tracker project alias
      *
      * @var    string|boolean
      * @since  2.0
      */
     protected $trackerAlias;
-/**
+
+    /**
+     * @var Registry
+     * @since 4.4.0
+     */
+    protected $settings;
+
+    /**
      * Method to render the view.
      *
      * @return  void
      *
-     * @since   2.0.0
      * @throws  Exception
+     * @since   2.0.0
      */
     public function display($tpl = null): void
     {
@@ -106,10 +120,13 @@ class HtmlView extends BaseHtmlView
             $this->pagination    = $model->getPagination();
             $this->filterForm    = $model->getFilterForm();
             $this->activeFilters = $model->getActiveFilters();
-            $this->trackerAlias  = TrackerHelper::getTrackerAlias($this->state->get('github_user'), $this->state->get('github_repo'));
+            $this->settings      = ComponentHelper::getParams('com_patchtester');
+            $this->trackerAlias  = TrackerHelper::getTrackerAlias(
+                $this->state->get('github_user'),
+                $this->state->get('github_repo')
+            );
         }
 
-        // Change the layout if there are environment errors
         if (count($this->envErrors)) {
             $this->setLayout('errors');
         }
@@ -132,7 +149,18 @@ class HtmlView extends BaseHtmlView
         ToolbarHelper::title(Text::_('COM_PATCHTESTER'), 'patchtester fas fa-save');
         if (!count($this->envErrors)) {
             $toolbar = Toolbar::getInstance('toolbar');
-            $toolbar->appendButton('Popup', 'sync', 'COM_PATCHTESTER_TOOLBAR_FETCH_DATA', 'index.php?option=com_patchtester&view=fetch&task=fetch&tmpl=component', 500, 210, 0, 0, 'window.parent.location.reload()', Text::_('COM_PATCHTESTER_HEADING_FETCH_DATA'));
+            $toolbar->appendButton(
+                'Popup',
+                'sync',
+                'COM_PATCHTESTER_TOOLBAR_FETCH_DATA',
+                'index.php?option=com_patchtester&view=fetch&task=fetch&tmpl=component',
+                500,
+                210,
+                0,
+                0,
+                'window.parent.location.reload()',
+                Text::_('COM_PATCHTESTER_HEADING_FETCH_DATA')
+            );
             $toolbar->appendButton('Standard', 'expired', 'COM_PATCHTESTER_TOOLBAR_RESET', 'reset.reset', false);
         }
 

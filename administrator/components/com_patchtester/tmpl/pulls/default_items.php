@@ -8,13 +8,13 @@
  */
 
 use Joomla\CMS\Language\Text;
-use Joomla\Component\Patchtester\Administrator\View\Pulls\PullsHtmlView;
+use Joomla\Component\Patchtester\Administrator\View\Pulls\HtmlView;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-/** @var PullsHtmlView $this */
+/** @var HtmlView $this */
 
 foreach ($this->items as $i => $item) :
     $status = '';
@@ -91,11 +91,9 @@ foreach ($this->items as $i => $item) :
                         case 'test instructions missing':
                         case 'updates requested':
                             $textColor = '000000';
-
                             break;
                         default:
                             $textColor = 'FFFFFF';
-
                             break;
                     }
                     ?>
@@ -133,18 +131,29 @@ foreach ($this->items as $i => $item) :
             endif; ?>
       </td>
       <td class="text-center">
-            <?php if ($item->applied) :
-                ?>
-                <button type="button" class="btn btn-sm btn-success submitPatch"
-                        data-task="revert" data-id="<?php echo (int) $item->applied; ?>"><?php echo Text::_('COM_PATCHTESTER_REVERT_PATCH'); ?></button>
-                <?php
-            else :
-                ?>
-              <button type="button" class="btn btn-sm btn-primary submitPatch"
-                        data-task="apply" data-id="<?php echo (int) $item->pull_id; ?>"><?php echo Text::_('COM_PATCHTESTER_APPLY_PATCH'); ?></button>
-                <?php
-            endif; ?>
-        </td>
+          <?php $hideButton = function($labels) {
+                foreach ($labels as $label) {
+                    if (in_array(strtolower($label->name), ['npm resource changed', 'composer dependency changed', 'rtc'])) {
+                        return true;
+                    }
+                }
+
+                return false;
+          };?>
+          <?php if ($this->settings->get('advanced', 0) || !$hideButton($item->labels)) : ?>
+              <?php if ($item->applied) :
+                  ?>
+                  <button type="button" class="btn btn-sm btn-success submitPatch"
+                          data-task="revert" data-id="<?php echo (int) $item->applied; ?>"><?php echo Text::_('COM_PATCHTESTER_REVERT_PATCH'); ?></button>
+                  <?php
+              else :
+                  ?>
+                <button type="button" class="btn btn-sm btn-primary submitPatch"
+                          data-task="apply" data-id="<?php echo (int) $item->pull_id; ?>"><?php echo Text::_('COM_PATCHTESTER_APPLY_PATCH'); ?></button>
+                  <?php
+              endif; ?>
+          <?php endif; ?>
+      </td>
   </tr>
     <?php
 endforeach;
