@@ -783,7 +783,7 @@ class PullModel extends BaseDatabaseModel
             $filePath            = explode('/', $prodFileName);
             // Remove the `src` here to match the CMS paths if needed
             if ($filePath[0] === 'src') {
-                $prodFileName = preg_replace('/^src\\//', '', $prodFileName, 1);;
+                $prodFileName = preg_replace('/^src\\//', '', $prodFileName, 1);
             }
 
             if ($prodRenamedFileName) {
