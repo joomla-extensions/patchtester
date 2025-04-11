@@ -39,7 +39,7 @@ class ApplyController extends BaseController
         try {
             /** @var PullModel $model */
             $model = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pull', 'Administrator', ['ignore_request' => true]);
-            $msg = Text::_('COM_PATCHTESTER_NO_FILES_TO_PATCH');
+            $msg   = Text::_('COM_PATCHTESTER_NO_FILES_TO_PATCH');
 
             if ($model->apply($this->input->getUint('pull_id'))) {
                 $msg = Text::_('COM_PATCHTESTER_APPLY_OK');

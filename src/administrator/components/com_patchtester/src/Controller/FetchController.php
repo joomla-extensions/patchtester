@@ -9,7 +9,6 @@
 
 namespace Joomla\Component\Patchtester\Administrator\Controller;
 
-use Exception;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
@@ -32,7 +31,7 @@ class FetchController extends BaseController
      *
      * @return  void  Redirects the application
      *
-     * @throws  Exception
+     * @throws  \Exception
      * @since   2.0
      */
     public function execute($task)
@@ -50,7 +49,7 @@ class FetchController extends BaseController
             $model = $this->app->bootComponent('com_patchtester')->getMVCFactory()->createModel('Pulls', 'Administrator');
 
             $status = $model->requestFromGithub($page);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $response = new JsonResponse($e);
             $this->app->sendHeaders();
             echo json_encode($response);
@@ -64,7 +63,7 @@ class FetchController extends BaseController
         if ($status['complete'] || $page === $session->get('com_patchtester_fetcher_last_page', false)) {
             $status['complete'] = true;
             $status['header']   = Text::_('COM_PATCHTESTER_FETCH_SUCCESSFUL', true);
-            $message = Text::_('COM_PATCHTESTER_FETCH_COMPLETE_CLOSE_WINDOW', true);
+            $message            = Text::_('COM_PATCHTESTER_FETCH_COMPLETE_CLOSE_WINDOW', true);
         } elseif (isset($status['page'])) {
             $session->set('com_patchtester_fetcher_page', $status['page']);
             $message = Text::sprintf('COM_PATCHTESTER_FETCH_PAGE_NUMBER', $status['page']);

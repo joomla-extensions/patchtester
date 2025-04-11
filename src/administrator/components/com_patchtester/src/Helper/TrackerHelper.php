@@ -22,23 +22,23 @@ abstract class TrackerHelper
      * @var    array
      * @since  2.0
      */
-    private static $projects = array(
-        'joomla-cms'  => array(
+    private static $projects = [
+        'joomla-cms' => [
             'githubUser'   => 'joomla',
             'githubrepo'   => 'joomla-cms',
             'projectAlias' => 'joomla-cms',
-        ),
-        'patchtester' => array(
+        ],
+        'patchtester' => [
             'githubUser'   => 'joomla-extensions',
             'githubrepo'   => 'patchtester',
             'projectAlias' => 'patchtester',
-        ),
-        'weblinks'    => array(
+        ],
+        'weblinks' => [
             'githubUser'   => 'joomla-extensions',
             'githubrepo'   => 'weblinks',
             'projectAlias' => 'weblinks',
-        ),
-    );
+        ],
+    ];
 
     /**
      * Get the issue tracker project alias for a GitHub repository
@@ -53,7 +53,7 @@ abstract class TrackerHelper
     public static function getTrackerAlias($githubUser, $githubRepo)
     {
         // If the repo isn't even listed, no point in going further
-        if (!array_key_exists($githubRepo, self::$projects)) {
+        if (!\array_key_exists($githubRepo, self::$projects)) {
             return false;
         }
 

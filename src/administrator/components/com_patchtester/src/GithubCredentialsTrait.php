@@ -16,7 +16,7 @@ trait GithubCredentialsTrait
 {
     protected function getCredentials(): Registry
     {
-        $state = new Registry();
+        $state  = new Registry();
         $params = ComponentHelper::getParams('com_patchtester');
         $state->set('github_user', $params->get('org', 'joomla'));
         $state->set('github_repo', $params->get('repo', 'joomla-cms'));

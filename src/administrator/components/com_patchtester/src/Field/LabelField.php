@@ -41,7 +41,7 @@ class LabelField extends ListField
      */
     public function getOptions(): array
     {
-        $db = Factory::getContainer()->get('DatabaseDriver');
+        $db    = Factory::getContainer()->get('DatabaseDriver');
         $query = $db->getQuery(true);
         $query->select(
             'DISTINCT(' . $db->quoteName('name') . ') AS ' . $db->quoteName(

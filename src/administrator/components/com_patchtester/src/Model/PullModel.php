@@ -25,8 +25,6 @@ use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\Path;
 use Joomla\Registry\Registry;
-use RuntimeException;
-use stdClass;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -97,7 +95,7 @@ class PullModel extends BaseDatabaseModel
      */
     public function __construct(
         $config = [],
-        MVCFactoryInterface $factory = null
+        ?MVCFactoryInterface $factory = null
     ) {
         parent::__construct($config, $factory);
 
@@ -114,7 +112,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  bool
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   3.0
      *
      */
@@ -136,7 +134,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  boolean
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   3.0
      *
      */
@@ -149,7 +147,7 @@ class PullModel extends BaseDatabaseModel
         // Retrieve pullData for sha later on.
         $pull = $this->retrieveGitHubData($github, $id);
         if ($pull->head->repo === null) {
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
+            throw new \RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
         }
 
         $sha = $pull->head->sha;
@@ -162,7 +160,7 @@ class PullModel extends BaseDatabaseModel
         $backupsPath   = $ciSettings->get('folder.backups') . '/' . $id;
         $delLogPath    = $tempPath . '/' . $ciSettings->get('zip.log.name');
         $zipPath       = $tempPath . '/' . $ciSettings->get('zip.name');
-        $serverZipPath = sprintf($ciSettings->get('zip.url'), $id);
+        $serverZipPath = \sprintf($ciSettings->get('zip.url'), $id);
         // Patch has already been applied
         if (file_exists($backupsPath)) {
             return false;
@@ -179,7 +177,7 @@ class PullModel extends BaseDatabaseModel
         try {
             $http   = HttpFactory::getHttp($httpOption);
             $result = $http->get($serverZipPath);
-        } catch (RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $result = null;
         }
 
@@ -188,7 +186,7 @@ class PullModel extends BaseDatabaseModel
             || ($result->getStatusCode() !== 200
                 && $result->getStatusCode() !== 310)
         ) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::_('COM_PATCHTESTER_SERVER_RESPONDED_NOT_200')
             );
         }
@@ -199,7 +197,7 @@ class PullModel extends BaseDatabaseModel
         File::write($zipPath, $content);
         // Check if zip folder could have been downloaded
         if (!file_exists($zipPath)) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::_('COM_PATCHTESTER_ZIP_DOES_NOT_EXIST')
             );
         }
@@ -208,7 +206,7 @@ class PullModel extends BaseDatabaseModel
         $zip = new Zip();
         if (!$zip->extract($zipPath, $tempPath)) {
             Folder::delete($tempPath);
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::_('COM_PATCHTESTER_ZIP_EXTRACT_FAILED')
             );
         }
@@ -219,7 +217,7 @@ class PullModel extends BaseDatabaseModel
         if ($this->verifyAutoloader($tempPath) === false) {
             // There is something broken in the autoloader, clean up and go back
             Folder::delete($tempPath);
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::_('COM_PATCHTESTER_PATCH_BREAKS_SITE')
             );
         }
@@ -277,11 +275,11 @@ class PullModel extends BaseDatabaseModel
                         JPATH_ROOT . '/' . $file
                     );
                 }
-            } catch (RuntimeException $exception) {
+            } catch (\RuntimeException $exception) {
                 Folder::delete($tempPath);
                 Folder::move($backupsPath, $backupsPath . '_failed');
 
-                throw new RuntimeException(
+                throw new \RuntimeException(
                     Text::sprintf(
                         'COM_PATCHTESTER_FAILED_APPLYING_PATCH',
                         $file,
@@ -309,19 +307,19 @@ class PullModel extends BaseDatabaseModel
      * @param   GitHub   $github  github object
      * @param   integer  $id      Id of the pull request
      *
-     * @return  stdClass The pull request data
+     * @return  \stdClass The pull request data
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   2.0
      *
      */
-    private function retrieveGitHubData(GitHub $github, int $id): stdClass
+    private function retrieveGitHubData(GitHub $github, int $id): \stdClass
     {
         try {
             $rateResponse = $github->getRateLimit();
             $rate         = json_decode($rateResponse->body, false);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
@@ -333,7 +331,7 @@ class PullModel extends BaseDatabaseModel
 
         // If over the API limit, we can't build this list
         if ((int)$rate->resources->core->remaining === 0) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_API_LIMIT_LIST',
                     Factory::getDate($rate->resources->core->reset)
@@ -349,7 +347,7 @@ class PullModel extends BaseDatabaseModel
             );
             $pull         = json_decode($pullResponse->body, false);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
@@ -446,7 +444,7 @@ class PullModel extends BaseDatabaseModel
         $path = Path::clean($path);
 
         foreach ($files as $file) {
-            if (is_array($file)) {
+            if (\is_array($file)) {
                 $this->checkFilesExist($file, $path);
             } elseif (!file_exists($file)) {
                 // Check if the file exists in the Joomla filesystem
@@ -474,7 +472,7 @@ class PullModel extends BaseDatabaseModel
     private function saveAppliedPatch(
         int $id,
         array $fileList,
-        string $sha = null
+        ?string $sha = null
     ): int {
         $record = (object)[
             'pull_id'         => $id,
@@ -506,7 +504,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  boolean
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   2.0
      *
      */
@@ -515,13 +513,13 @@ class PullModel extends BaseDatabaseModel
         $github = Helper::initializeGithub();
         $pull   = $this->retrieveGitHubData($github, $id);
         if ($pull->head->repo === null) {
-            throw new RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
+            throw new \RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
         }
 
         try {
             $files = $this->getFiles($id, 1);
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                     $exception->getMessage()
@@ -531,12 +529,12 @@ class PullModel extends BaseDatabaseModel
             );
         }
 
-        if (!count($files)) {
+        if (!\count($files)) {
             return false;
         }
 
         $parsedFiles = $this->parseFileList($files);
-        if (!count($parsedFiles)) {
+        if (!\count($parsedFiles)) {
             return false;
         }
 
@@ -544,7 +542,7 @@ class PullModel extends BaseDatabaseModel
             switch ($file->action) {
                 case 'deleted':
                     if (!file_exists(JPATH_ROOT . '/' . $file->filename)) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_FILE_DELETED_DOES_NOT_EXIST_S',
                                 $file->filename
@@ -559,7 +557,7 @@ class PullModel extends BaseDatabaseModel
                 case 'renamed':
                     // If the backup file already exists, we can't apply the patch
                     if (file_exists(JPATH_COMPONENT . '/backups/' . md5($file->filename) . '.txt')) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_CONFLICT_S',
                                 $file->filename
@@ -571,7 +569,7 @@ class PullModel extends BaseDatabaseModel
                         $file->action === 'modified'
                         && !file_exists(JPATH_ROOT . '/' . $file->filename)
                     ) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_FILE_MODIFIED_DOES_NOT_EXIST_S',
                                 $file->filename
@@ -597,14 +595,14 @@ class PullModel extends BaseDatabaseModel
 
                                 break;
                             default:
-                                throw new RuntimeException(
+                                throw new \RuntimeException(
                                     Text::_(
                                         'COM_PATCHTESTER_ERROR_UNSUPPORTED_ENCODING'
                                     )
                                 );
                         }
                     } catch (UnexpectedResponse $exception) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB',
                                 $exception->getMessage()
@@ -631,7 +629,7 @@ class PullModel extends BaseDatabaseModel
                 $dest     = JPATH_COMPONENT . '/backups/' . md5($filename) . '.txt';
 
                 if (!File::copy(Path::clean($src), $dest)) {
-                    throw new RuntimeException(
+                    throw new \RuntimeException(
                         Text::sprintf(
                             'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
                             $src,
@@ -645,7 +643,7 @@ class PullModel extends BaseDatabaseModel
                 case 'modified':
                 case 'added':
                     if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
                                 JPATH_ROOT . '/' . $file->filename
@@ -657,7 +655,7 @@ class PullModel extends BaseDatabaseModel
                     break;
                 case 'deleted':
                     if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->filename))) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                 JPATH_ROOT . '/' . $file->filename
@@ -669,7 +667,7 @@ class PullModel extends BaseDatabaseModel
                     break;
                 case 'renamed':
                     if (!File::delete(Path::clean(JPATH_ROOT . '/' . $file->originalFile))) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                 JPATH_ROOT . '/' . $file->originalFile
@@ -678,7 +676,7 @@ class PullModel extends BaseDatabaseModel
                     }
 
                     if (!File::write(Path::clean(JPATH_ROOT . '/' . $file->filename), $file->body)) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_WRITE_FILE',
                                 JPATH_ROOT . '/' . $file->filename
@@ -751,7 +749,7 @@ class PullModel extends BaseDatabaseModel
     /**
      * Parse the list of modified files from a pull request
      *
-     * @param   stdClass  $files  The modified files to parse
+     * @param   \stdClass  $files  The modified files to parse
      *
      * @return  array
      *
@@ -768,11 +766,11 @@ class PullModel extends BaseDatabaseModel
         foreach ($files as $file) {
             if (!$isDev) {
                 $filePath = explode('/', $file->filename);
-                if (in_array($filePath[0], $this->nonProductionFiles, true)) {
+                if (\in_array($filePath[0], $this->nonProductionFiles, true)) {
                     continue;
                 }
 
-                if (in_array($filePath[0], $this->nonProductionFolders, true)) {
+                if (\in_array($filePath[0], $this->nonProductionFolders, true)) {
                     continue;
                 }
             }
@@ -798,13 +796,13 @@ class PullModel extends BaseDatabaseModel
                 }
             }
 
-            $parsedFiles[] = (object)array(
+            $parsedFiles[] = (object)[
                 'action'       => $file->status,
                 'filename'     => $prodFileName,
                 'repofilename' => $file->filename,
                 'fileurl'      => $file->contents_url,
                 'originalFile' => $prodRenamedFileName,
-            );
+            ];
         }
 
         return $parsedFiles;
@@ -818,13 +816,13 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  boolean
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   3.0
      */
     public function revert(int $id): bool
     {
         $params = ComponentHelper::getParams('com_patchtester');
-// Decide based on repository settings whether patch will be applied through Github or CIServer
+        // Decide based on repository settings whether patch will be applied through Github or CIServer
         if ((bool)$params->get('ci_switch', 0)) {
             return $this->revertWithCIServer($id);
         }
@@ -839,7 +837,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  boolean
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   3.0
      */
     public function revertWithCIServer(int $id): bool
@@ -847,14 +845,14 @@ class PullModel extends BaseDatabaseModel
         // Get the CIServer Registry
         $ciSettings = Helper::initializeCISettings();
         $testRecord = $this->getTestRecord($id);
-// We don't want to restore files from an older version
+        // We don't want to restore files from an older version
         if ($testRecord->applied_version !== JVERSION) {
             return $this->removeTest($testRecord);
         }
 
         $files = json_decode($testRecord->data, false);
         if (!$files) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE',
                     __METHOD__,
@@ -882,7 +880,7 @@ class PullModel extends BaseDatabaseModel
                     }
 
                     // If folder is empty, remove it as well
-                    if (count(glob(JPATH_ROOT . '/' . $filePath . '/*')) === 0) {
+                    if (\count(glob(JPATH_ROOT . '/' . $filePath . '/*')) === 0) {
                         Folder::delete(JPATH_ROOT . '/' . $filePath);
                     }
                 } elseif (file_exists($backupsPath . '/' . $file)) {
@@ -896,8 +894,8 @@ class PullModel extends BaseDatabaseModel
                         JPATH_ROOT . '/' . $file
                     );
                 }
-            } catch (RuntimeException $exception) {
-                throw new RuntimeException(
+            } catch (\RuntimeException $exception) {
+                throw new \RuntimeException(
                     Text::sprintf(
                         'COM_PATCHTESTER_FAILED_REVERT_PATCH',
                         $file,
@@ -908,9 +906,9 @@ class PullModel extends BaseDatabaseModel
         }
 
         Folder::delete($backupsPath);
-// Update the autoloader file
+        // Update the autoloader file
         $this->namespaceMapper->create();
-// Change the media version
+        // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
 
@@ -922,11 +920,11 @@ class PullModel extends BaseDatabaseModel
      *
      * @param   integer  $id  ID of the record
      *
-     * @return  stdClass  $testRecord  The record looking for
+     * @return  \stdClass  $testRecord  The record looking for
      *
      * @since   3.0.0
      */
-    private function getTestRecord(int $id): stdClass
+    private function getTestRecord(int $id): \stdClass
     {
         $db = $this->getDatabase();
 
@@ -941,13 +939,13 @@ class PullModel extends BaseDatabaseModel
     /**
      * Remove the database record for a test
      *
-     * @param   stdClass  $testRecord  The record being deleted
+     * @param   \stdClass  $testRecord  The record being deleted
      *
      * @return  boolean
      *
      * @since   3.0.0
      */
-    private function removeTest(stdClass $testRecord): bool
+    private function removeTest(\stdClass $testRecord): bool
     {
         $db = $this->getDatabase();
         // Remove the retrieved commit SHA from the pulls table for this item
@@ -974,20 +972,20 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  boolean
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   2.0
      */
     public function revertWithGitHub(int $id): bool
     {
         $testRecord = $this->getTestRecord($id);
-// We don't want to restore files from an older version
+        // We don't want to restore files from an older version
         if ($testRecord->applied_version != JVERSION) {
             return $this->removeTest($testRecord);
         }
 
         $files = json_decode($testRecord->data, false);
         if (!$files) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_ERROR_READING_DATABASE_TABLE',
                     __METHOD__,
@@ -1004,7 +1002,7 @@ class PullModel extends BaseDatabaseModel
                         . '.txt';
                     $dest = JPATH_ROOT . '/' . $file->filename;
                     if (!File::copy($src, $dest)) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
                                 $src,
@@ -1015,7 +1013,7 @@ class PullModel extends BaseDatabaseModel
 
                     if (file_exists($src)) {
                         if (!File::delete($src)) {
-                            throw new RuntimeException(
+                            throw new \RuntimeException(
                                 Text::sprintf(
                                     'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                     $src
@@ -1030,7 +1028,7 @@ class PullModel extends BaseDatabaseModel
                     $src = JPATH_ROOT . '/' . $file->filename;
                     if (file_exists($src)) {
                         if (!File::delete($src)) {
-                            throw new RuntimeException(
+                            throw new \RuntimeException(
                                 Text::sprintf(
                                     'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                     $src
@@ -1046,7 +1044,7 @@ class PullModel extends BaseDatabaseModel
                     $dest        = JPATH_ROOT . '/' . $file->originalFile;
 
                     if (!File::copy($originalSrc, $dest)) {
-                        throw new RuntimeException(
+                        throw new \RuntimeException(
                             Text::sprintf(
                                 'COM_PATCHTESTER_ERROR_CANNOT_COPY_FILE',
                                 $originalSrc,
@@ -1057,7 +1055,7 @@ class PullModel extends BaseDatabaseModel
 
                     if (file_exists($originalSrc)) {
                         if (!File::delete($originalSrc)) {
-                            throw new RuntimeException(
+                            throw new \RuntimeException(
                                 Text::sprintf(
                                     'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                     $originalSrc
@@ -1068,7 +1066,7 @@ class PullModel extends BaseDatabaseModel
 
                     if (file_exists($newSrc)) {
                         if (!File::delete($newSrc)) {
-                            throw new RuntimeException(
+                            throw new \RuntimeException(
                                 Text::sprintf(
                                     'COM_PATCHTESTER_ERROR_CANNOT_DELETE_FILE',
                                     $newSrc
@@ -1084,7 +1082,7 @@ class PullModel extends BaseDatabaseModel
 
         // Update the autoloader file
         $this->namespaceMapper->create();
-// Change the media version
+        // Change the media version
         $version = new Version();
         $version->refreshMediaVersion();
 

@@ -7,7 +7,7 @@
  * @license    GNU General Public License version 2 or later
  */
 
-defined('_JEXEC') or die;
+\defined('_JEXEC') or die;
 
 use Joomla\CMS\Dispatcher\ComponentDispatcherFactoryInterface;
 use Joomla\CMS\Extension\ComponentInterface;
@@ -41,7 +41,7 @@ return new class () implements ServiceProviderInterface {
         $container->set(
             ComponentInterface::class,
             function (Container $container) {
-                require_once dirname(__DIR__) . '/vendor/autoload.php';
+                require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
                 $component = new PatchtesterComponent($container->get(ComponentDispatcherFactoryInterface::class));
 

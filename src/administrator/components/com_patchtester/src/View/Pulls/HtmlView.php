@@ -9,7 +9,6 @@
 
 namespace Joomla\Component\Patchtester\Administrator\View\Pulls;
 
-use Exception;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
@@ -100,20 +99,20 @@ class HtmlView extends BaseHtmlView
      *
      * @return  void
      *
-     * @throws  Exception
+     * @throws  \Exception
      * @since   2.0.0
      */
     public function display($tpl = null): void
     {
-        if (!extension_loaded('openssl')) {
+        if (!\extension_loaded('openssl')) {
             $this->envErrors[] = Text::_('COM_PATCHTESTER_REQUIREMENT_OPENSSL');
         }
 
-        if (!in_array('https', stream_get_wrappers(), true)) {
+        if (!\in_array('https', stream_get_wrappers(), true)) {
             $this->envErrors[] = Text::_('COM_PATCHTESTER_REQUIREMENT_HTTPS');
         }
 
-        if (!count($this->envErrors)) {
+        if (!\count($this->envErrors)) {
             $model               = $this->getModel();
             $this->state         = $model->getState();
             $this->items         = $model->getItems();
@@ -127,7 +126,7 @@ class HtmlView extends BaseHtmlView
             );
         }
 
-        if (count($this->envErrors)) {
+        if (\count($this->envErrors)) {
             $this->setLayout('errors');
         }
 
@@ -147,7 +146,7 @@ class HtmlView extends BaseHtmlView
     protected function addToolbar(): void
     {
         ToolbarHelper::title(Text::_('COM_PATCHTESTER'), 'patchtester fas fa-save');
-        if (!count($this->envErrors)) {
+        if (!\count($this->envErrors)) {
             $toolbar = $this->getDocument()->getToolbar();
             $toolbar->appendButton('Popup', 'sync', 'COM_PATCHTESTER_TOOLBAR_FETCH_DATA', 'index.php?option=com_patchtester&view=fetch&task=fetch&tmpl=component', 500, 210, 0, 0, 'window.parent.location.reload()', Text::_('COM_PATCHTESTER_HEADING_FETCH_DATA'));
             $toolbar->appendButton('Standard', 'expired', 'COM_PATCHTESTER_TOOLBAR_RESET', 'reset.reset', false);

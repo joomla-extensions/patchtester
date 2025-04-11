@@ -71,7 +71,7 @@ class StartfetchController extends BaseController
         $testsModel = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory()->createModel('Tests', 'Administrator', ['ignore_request' => true]);
         try {
             // Sanity check, ensure there aren't any applied patches
-            if (count($testsModel->getAppliedPatches()) >= 1) {
+            if (\count($testsModel->getAppliedPatches()) >= 1) {
                 $response = new JsonResponse(new \Exception(Text::_('COM_PATCHTESTER_ERROR_APPLIED_PATCHES'), 500));
                 $this->app->sendHeaders();
                 echo json_encode($response);
@@ -89,7 +89,7 @@ class StartfetchController extends BaseController
         $response = new JsonResponse(
             [
                 'complete' => false,
-                'header' => Text::_('COM_PATCHTESTER_FETCH_PROCESSING', true)
+                'header'   => Text::_('COM_PATCHTESTER_FETCH_PROCESSING', true),
             ],
             Text::sprintf('COM_PATCHTESTER_FETCH_PAGE_NUMBER', 1),
             false,

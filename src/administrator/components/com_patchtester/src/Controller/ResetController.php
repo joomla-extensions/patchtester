@@ -43,7 +43,7 @@ class ResetController extends BaseController
         try {
             $hasErrors     = false;
             $revertErrored = false;
-            $mvcFactory = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory();
+            $mvcFactory    = Factory::getApplication()->bootComponent('com_patchtester')->getMVCFactory();
             /** @var PullModel $pullModel */
             $pullModel  = $mvcFactory->createModel('Pull', 'Administrator', ['ignore_request' => true]);
             /** @var PullsModel $pullModel */
@@ -53,7 +53,7 @@ class ResetController extends BaseController
 
             // Check the applied patches in the database first
             $appliedPatches = $testsModel->getAppliedPatches();
-            $params = ComponentHelper::getParams('com_patchtester');
+            $params         = ComponentHelper::getParams('com_patchtester');
             // Decide based on repository settings whether patch will be applied through Github or CIServer
             if ((bool) $params->get('ci_switch', 1)) {
                 // Let's try to cleanly revert all applied patches with ci
@@ -65,7 +65,7 @@ class ResetController extends BaseController
                     }
                 }
             } else {
-            // Let's try to cleanly revert all applied patches
+                // Let's try to cleanly revert all applied patches
                 foreach ($appliedPatches as $patch) {
                     try {
                         $pullModel->revertWithGitHub($patch->id);
@@ -104,7 +104,7 @@ class ResetController extends BaseController
             // Check the backups directory to see if any .txt files remain; clear them if so
             $backups = Folder::files(JPATH_COMPONENT . '/backups', '.txt');
 
-            if (count($backups)) {
+            if (\count($backups)) {
                 foreach ($backups as $file) {
                     if (!File::delete(JPATH_COMPONENT . '/backups/' . $file)) {
                         $this->app->enqueueMessage(

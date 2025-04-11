@@ -35,7 +35,7 @@ abstract class Helper
      */
     public static function initializeGithub()
     {
-        $params = ComponentHelper::getParams('com_patchtester');
+        $params  = ComponentHelper::getParams('com_patchtester');
         $options = new Registry();
         // Set a user agent for the request
         $options->set('userAgent', 'PatchTester/4.0');
@@ -63,17 +63,17 @@ abstract class Helper
      */
     public static function initializeCISettings()
     {
-        $params = ComponentHelper::getParams('com_patchtester');
+        $params  = ComponentHelper::getParams('com_patchtester');
         $options = new Registry();
-// Set CI server address for the request
+        // Set CI server address for the request
         $options->set('server.url', $params->get('ci_server', 'https://ci.joomla.org:444'));
-// Set name of the zip archive
+        // Set name of the zip archive
         $options->set('zip.name', 'build.zip');
         $options->set('zip.log.name', 'deleted_files.log');
-// Set temp archive for extracting and downloading files
+        // Set temp archive for extracting and downloading files
         $options->set('folder.temp', Factory::getConfig()->get('tmp_path'));
         $options->set('folder.backups', JPATH_COMPONENT . '/backups');
-// Set full url for addressing the file
+        // Set full url for addressing the file
         $options->set('zip.url', $options->get('server.url') . '/artifacts/joomla/joomla-cms/4.0-dev/%s/patchtester/' . $options->get('zip.name'));
         return $options;
     }

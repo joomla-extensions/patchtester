@@ -9,8 +9,6 @@
 
 namespace Joomla\Component\Patchtester\Administrator\Exception;
 
-use DomainException;
-use Exception;
 use Joomla\Http\Response;
 
 /**
@@ -18,7 +16,7 @@ use Joomla\Http\Response;
  *
  * @since  3.0.0
  */
-class UnexpectedResponse extends DomainException
+class UnexpectedResponse extends \DomainException
 {
     /**
      * The Response object.
@@ -34,7 +32,7 @@ class UnexpectedResponse extends DomainException
      * @param   Response        $response  The Response object.
      * @param   string          $message   The Exception message to throw.
      * @param   int             $code      The Exception code.
-     * @param   Exception|null  $previous  The previous exception used for the exception chaining.
+     * @param   \Exception|null  $previous  The previous exception used for the exception chaining.
      *
      * @since   3.0.0
      */
@@ -42,7 +40,7 @@ class UnexpectedResponse extends DomainException
         Response $response,
         $message = '',
         $code = 0,
-        Exception $previous = null
+        ?\Exception $previous = null
     ) {
         parent::__construct($message, $code, $previous);
         $this->response = $response;

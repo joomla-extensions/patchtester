@@ -27,6 +27,10 @@
 		<exclude-pattern type="relative">src/administrator/manifests/packages/**/script\.php</exclude-pattern>
 	</rule>
 
+	<rule ref="PSR1.Classes.ClassDeclaration">
+		<exclude-pattern type="relative">src/administrator/components/**/script\.php</exclude-pattern>
+	</rule>
+
 	<rule ref="Squiz.Classes.ValidClassName">
 		<exclude-pattern type="relative">src/administrator/components/**/script\.php</exclude-pattern>
 		<exclude-pattern type="relative">src/administrator/manifests/packages/**/script\.php</exclude-pattern>
