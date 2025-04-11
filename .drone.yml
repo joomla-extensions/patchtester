@@ -21,7 +21,7 @@ steps:
       - echo $(date)
 
   - name: prepare_tests
-    depends_on: [ npm ]
+    depends_on: [ composer ]
     image: joomlaprojects/docker-images:cypress8.2
     commands:
       - vendor/bin/robo build
@@ -45,6 +45,6 @@ volumes:
 
 ---
 kind: signature
-hmac: f936fec75fab13486c94359c3bd2eba7cc2c3d6a8687ea25074a89751560c987
+hmac: 185a81743827fe02d6281724b30bdb25fb6e161f68d545483fa1924e61874b57
 
 ...
