@@ -1,32 +1,34 @@
 <?xml version="1.0"?>
 <ruleset name="Joomla-CMS">
-    <description>The Joomla CMS PSR-12 exceptions.</description>
+	<description>The Joomla CMS PSR-12 exceptions.</description>
 
-    <!-- Exclude folders not containing production code -->
-    <exclude-pattern type="relative">build/packag*</exclude-pattern>
-    <exclude-pattern type="relative">administrator/components/com_patchtester/vendor/*</exclude-pattern>
+	<!-- Exclude folders not containing production code -->
 
-    <rule ref="PSR12">
-        <exclude name="Generic.Files.LineEndings"/>
-    </rule>
+	<!-- Exclude 3rd party libraries and Framework code. -->
 
-    <!-- temporary extend the line length -->
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="560"/>
-            <property name="absoluteLineLimit" value="560"/>
-        </properties>
-    </rule>
+	<exclude-pattern type="relative">src/administrator/components/**/layouts/*</exclude-pattern>
 
-	<rule ref="PSR1.Files.SideEffects">
-		<exclude-pattern type="relative">build/patchtester/release\.php</exclude-pattern>
+	<rule ref="PSR12" />
+
+	<!-- temporary extend the line length -->
+	<rule ref="Generic.Files.LineLength">
+		<properties>
+			<property name="lineLimit" value="560"/>
+			<property name="absoluteLineLimit" value="560"/>
+		</properties>
 	</rule>
 
-	<rule ref="PSR1.Classes.ClassDeclaration">
-		<exclude-pattern type="relative">administrator/components/com_patchtester/script\.php</exclude-pattern>
+	<rule ref="PSR2.Classes.PropertyDeclaration.Underscore">
+		<exclude-pattern type="relative">src/administrator/components/**/src/Table/*\.php</exclude-pattern>
+	</rule>
+
+	<rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+		<exclude-pattern type="relative">src/administrator/components/**/script\.php</exclude-pattern>
+		<exclude-pattern type="relative">src/administrator/manifests/packages/**/script\.php</exclude-pattern>
 	</rule>
 
 	<rule ref="Squiz.Classes.ValidClassName">
-		<exclude-pattern type="relative">administrator/components/com_patchtester/script\.php</exclude-pattern>
+		<exclude-pattern type="relative">src/administrator/components/**/script\.php</exclude-pattern>
+		<exclude-pattern type="relative">src/administrator/manifests/packages/**/script\.php</exclude-pattern>
 	</rule>
 </ruleset>
