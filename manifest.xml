@@ -79,7 +79,7 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/joomla-extensions/patchtester/releases/download/5.0.0/com_patchtester_5.0.0.zip</downloadurl>
 		</downloads>
-		<sha384>e6bfc039ab4dac753124d79456ff00d51c06d602be84d4b9116d8970fcbd34b7233b592ac9f0ddbc045afa8726c12768</sha384>
+		<sha384>9b51456a819ba30fd904ea1c6f98550889e62c5992e7a4f5b7de384ff31b94d0b7929ecd7cc7dc51732d9a9fb164091c</sha384>
 		<tags>
 			<tag>stable</tag>
 		</tags>
