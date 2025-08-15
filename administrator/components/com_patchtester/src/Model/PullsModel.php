@@ -345,7 +345,7 @@ class PullsModel extends ListModel
                 $page,
                 $batchSize
             );
-            $pulls         = json_decode($pullsResponse->body);
+            $pulls         = json_decode((string) $pullsResponse->getBody());
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -387,7 +387,7 @@ class PullsModel extends ListModel
         }
 
         // If there are no pulls to insert then bail, assume we're finished
-        if (count($pulls) === 0) {
+        if (empty($pulls)) {
             return ['complete' => true];
         }
 
