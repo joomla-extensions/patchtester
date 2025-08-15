@@ -3,7 +3,7 @@
 /**
  * Patch testing component for the Joomla! CMS
  *
- * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2025 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later
  */
 
@@ -166,15 +166,15 @@ class GitHub
         int $expectedCode = 200
     ): Response {
         // Validate the response code.
-        if ($response->code != $expectedCode) {
+        if ($response->getStatusCode() != $expectedCode) {
             // Decode the error response and throw an exception.
-            $body  = json_decode($response->body);
+            $body  = json_decode((string) $response->getBody(), true);
             $error = $body->error ?? ($body->message ?? 'Unknown Error');
 
             throw new UnexpectedResponse(
                 $response,
                 $error,
-                $response->code
+                $response->getStatusCode()
             );
         }
 
