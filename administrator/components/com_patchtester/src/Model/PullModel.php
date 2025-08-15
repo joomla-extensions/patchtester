@@ -319,7 +319,7 @@ class PullModel extends BaseDatabaseModel
     {
         try {
             $rateResponse = $github->getRateLimit();
-            $rate         = json_decode($rateResponse->getBody(), false);
+            $rate         = json_decode((string) $rateResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -347,7 +347,7 @@ class PullModel extends BaseDatabaseModel
                 $this->getState()->get('github_repo'),
                 $id
             );
-            $pull         = json_decode($pullResponse->getBody(), false);
+            $pull         = json_decode((string) $pullResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -587,7 +587,7 @@ class PullModel extends BaseDatabaseModel
                             urlencode($pull->head->ref)
                         );
                         $contents         = json_decode(
-                            $contentsResponse->getBody(),
+                            (string) $contentsResponse->getBody(),
                             false
                         );
                         // In case encoding type ever changes
@@ -723,7 +723,7 @@ class PullModel extends BaseDatabaseModel
             $id,
             $page
         );
-        $files         = array_merge($files, json_decode($filesResponse->getBody(), false));
+        $files         = array_merge($files, json_decode((string) $filesResponse->getBody(), false));
         $lastPage      = 1;
         $headers       = $filesResponse->getHeaders();
 

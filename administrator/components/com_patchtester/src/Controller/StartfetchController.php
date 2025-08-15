@@ -52,7 +52,7 @@ class StartfetchController extends BaseController
         // Make sure we can fetch the data from GitHub - throw an error on < 10 available requests
         try {
             $rateResponse = Helper::initializeGithub()->getRateLimit();
-            $rate         = json_decode($rateResponse->getBody());
+            $rate         = json_decode((string) $rateResponse->getBody());
         } catch (\Exception $e) {
             $response = new JsonResponse(new \Exception(Text::sprintf('COM_PATCHTESTER_COULD_NOT_CONNECT_TO_GITHUB', $e->getMessage()), $e->getCode(), $e));
             $this->app->sendHeaders();
