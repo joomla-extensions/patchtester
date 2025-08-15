@@ -347,7 +347,7 @@ class PullModel extends BaseDatabaseModel
                 $this->getState()->get('github_repo'),
                 $id
             );
-            $pull         = json_decode($pullResponse->body, false);
+            $pull         = json_decode($pullResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -587,7 +587,7 @@ class PullModel extends BaseDatabaseModel
                             urlencode($pull->head->ref)
                         );
                         $contents         = json_decode(
-                            $contentsResponse->body,
+                            $contentsResponse->getBody(),
                             false
                         );
                         // In case encoding type ever changes
