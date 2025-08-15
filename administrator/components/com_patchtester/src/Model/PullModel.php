@@ -3,7 +3,7 @@
 /**
  * Patch testing component for the Joomla! CMS
  *
- * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2025 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later
  */
 
@@ -319,7 +319,7 @@ class PullModel extends BaseDatabaseModel
     {
         try {
             $rateResponse = $github->getRateLimit();
-            $rate         = json_decode($rateResponse->body, false);
+            $rate         = json_decode($rateResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -347,7 +347,7 @@ class PullModel extends BaseDatabaseModel
                 $this->getState()->get('github_repo'),
                 $id
             );
-            $pull         = json_decode($pullResponse->body, false);
+            $pull         = json_decode($pullResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
@@ -587,7 +587,7 @@ class PullModel extends BaseDatabaseModel
                             urlencode($pull->head->ref)
                         );
                         $contents         = json_decode(
-                            $contentsResponse->body,
+                            $contentsResponse->getBody(),
                             false
                         );
                         // In case encoding type ever changes
