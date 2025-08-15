@@ -319,7 +319,7 @@ class PullModel extends BaseDatabaseModel
     {
         try {
             $rateResponse = $github->getRateLimit();
-            $rate         = json_decode($rateResponse->body, false);
+            $rate         = json_decode($rateResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new RuntimeException(
                 Text::sprintf(
