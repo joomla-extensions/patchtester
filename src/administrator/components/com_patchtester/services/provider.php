@@ -41,8 +41,6 @@ return new class () implements ServiceProviderInterface {
         $container->set(
             ComponentInterface::class,
             function (Container $container) {
-                require_once \dirname(__DIR__) . '/vendor/autoload.php';
-
                 $component = new PatchtesterComponent($container->get(ComponentDispatcherFactoryInterface::class));
 
                 $component->setMVCFactory($container->get(MVCFactoryInterface::class));
