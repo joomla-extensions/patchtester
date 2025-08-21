@@ -83,6 +83,6 @@
 		<tags>
 			<tag>stable</tag>
 		</tags>
-		<targetplatform name="joomla" version="[6].[01234]" />
+		<targetplatform name="joomla" version="[56].[01234]" />
 	</update>
 </updates>
