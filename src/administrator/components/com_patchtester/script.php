@@ -31,7 +31,7 @@ class Com_PatchtesterInstallerScript extends InstallerScript
      */
     public function __construct()
     {
-        $this->minimumJoomla = '4.0';
+        $this->minimumJoomla = '5.0';
         $this->minimumPhp    = JOOMLA_MINIMUM_PHP;
         $this->deleteFolders = [
             '/administrator/components/com_patchtester/PatchTester',

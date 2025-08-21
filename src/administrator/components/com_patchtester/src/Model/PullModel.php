@@ -3,7 +3,7 @@
 /**
  * Patch testing component for the Joomla! CMS
  *
- * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2011 - 2012 Ian MacLennan, Copyright (C) 2013 - 2025 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later
  */
 
@@ -317,7 +317,7 @@ class PullModel extends BaseDatabaseModel
     {
         try {
             $rateResponse = $github->getRateLimit();
-            $rate         = json_decode($rateResponse->body, false);
+            $rate         = json_decode((string) $rateResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new \RuntimeException(
                 Text::sprintf(
@@ -345,7 +345,7 @@ class PullModel extends BaseDatabaseModel
                 $this->getState()->get('github_repo'),
                 $id
             );
-            $pull         = json_decode($pullResponse->body, false);
+            $pull         = json_decode((string) $pullResponse->getBody(), false);
         } catch (UnexpectedResponse $exception) {
             throw new \RuntimeException(
                 Text::sprintf(
@@ -585,7 +585,7 @@ class PullModel extends BaseDatabaseModel
                             urlencode($pull->head->ref)
                         );
                         $contents         = json_decode(
-                            $contentsResponse->body,
+                            (string) $contentsResponse->getBody(),
                             false
                         );
                         // In case encoding type ever changes
@@ -721,7 +721,7 @@ class PullModel extends BaseDatabaseModel
             $id,
             $page
         );
-        $files         = array_merge($files, json_decode($filesResponse->getBody(), false));
+        $files         = array_merge($files, json_decode((string) $filesResponse->getBody(), false));
         $lastPage      = 1;
         $headers       = $filesResponse->getHeaders();
 
@@ -781,17 +781,18 @@ class PullModel extends BaseDatabaseModel
             $filePath            = explode('/', $prodFileName);
             // Remove the `src` here to match the CMS paths if needed
             if ($filePath[0] === 'src') {
-                $prodFileName = str_replace('src/', '', $prodFileName);
+                $prodFileName = preg_replace('/^src\\//', '', $prodFileName, 1);
             }
 
             if ($prodRenamedFileName) {
                 $filePath = explode('/', $prodRenamedFileName);
                 // Remove the `src` here to match the CMS paths if needed
                 if ($filePath[0] === 'src') {
-                    $prodRenamedFileName = str_replace(
-                        'src/',
+                    $prodRenamedFileName = preg_replace(
+                        '/^src\\//',
                         '',
-                        $prodRenamedFileName
+                        $prodRenamedFileName,
+                        1
                     );
                 }
             }

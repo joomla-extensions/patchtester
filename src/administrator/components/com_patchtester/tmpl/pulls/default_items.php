@@ -147,14 +147,19 @@ foreach ($this->items as $i => $item) :
     return false;
           };?>
           <?php if ($this->settings->get('advanced', 0) || !$hideButton($item->labels)) : ?>
-                <?php if ($item->applied) : ?>
+                <?php if ($item->applied) :
+                    ?>
                   <button type="button" class="btn btn-sm btn-success submitPatch"
                           data-task="revert" data-id="<?php echo (int) $item->applied; ?>"><?php echo Text::_('COM_PATCHTESTER_REVERT_PATCH'); ?></button>
-                <?php else : ?>
-                  <button type="button" class="btn btn-sm btn-primary submitPatch"
+                    <?php
+                else :
+                    ?>
+                <button type="button" class="btn btn-sm btn-primary submitPatch"
                           data-task="apply" data-id="<?php echo (int) $item->pull_id; ?>"><?php echo Text::_('COM_PATCHTESTER_APPLY_PATCH'); ?></button>
-                <?php endif; ?>
+                    <?php
+                endif; ?>
           <?php endif; ?>
       </td>
-    </tr>
-<?php endforeach;
+  </tr>
+    <?php
+endforeach;
