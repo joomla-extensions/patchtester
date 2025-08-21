@@ -42,7 +42,7 @@ class BranchField extends ListField
     public function getOptions(): array
     {
         $db    = Factory::getContainer()->get('DatabaseDriver');
-        $query = $db->getQuery(true);
+        $query = $db->createQuery();
         $query->select(
             'DISTINCT(' . $db->quoteName('branch') . ') AS ' . $db->quoteName(
                 'text'

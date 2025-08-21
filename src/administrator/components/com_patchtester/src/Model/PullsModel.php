@@ -107,9 +107,10 @@ class PullsModel extends ListModel
             $this->getState()->get('list.limit')
         );
         $db    = $this->getDatabase();
-        $query = $db->getQuery(true)
+        $query = $db->createQuery()
             ->select($db->quoteName(['name', 'color']))
             ->from($db->quoteName('#__patchtester_pulls_labels'));
+
         array_walk($items, static function ($item) use ($db, $query) {
             $query->clear('where');
             $query->where($db->quoteName('pull_id') . ' = ' . $item->pull_id);
@@ -199,8 +200,8 @@ class PullsModel extends ListModel
     protected function getListQuery()
     {
         $db         = $this->getDatabase();
-        $query      = $db->getQuery(true);
-        $labelQuery = $db->getQuery(true);
+        $query      = $db->createQuery();
+        $labelQuery = $db->createQuery();
         $query->select('pulls.*')
             ->select($db->quoteName('tests.id', 'applied'))
             ->from($db->quoteName('#__patchtester_pulls', 'pulls'))
@@ -441,7 +442,7 @@ class PullsModel extends ListModel
 
         try {
             $this->getDatabase()->setQuery(
-                $this->getDatabase()->getQuery(true)
+                $this->getDatabase()->createQuery()
                     ->insert('#__patchtester_pulls')
                     ->columns([
                         'pull_id',
@@ -470,7 +471,7 @@ class PullsModel extends ListModel
         if ($labels) {
             try {
                 $this->getDatabase()->setQuery(
-                    $this->getDatabase()->getQuery(true)
+                    $this->getDatabase()->createQuery()
                         ->insert('#__patchtester_pulls_labels')
                         ->columns(['pull_id', 'name', 'color'])
                         ->values($labels)

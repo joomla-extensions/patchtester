@@ -33,7 +33,7 @@ class TestsModel extends BaseDatabaseModel
     public function getAppliedPatches(): array
     {
         $db = $this->getDatabase();
-        $db->setQuery($db->getQuery(true)
+        $db->setQuery($db->createQuery()
                 ->select('*')
                 ->from($db->quoteName('#__patchtester_tests'))
                 ->where($db->quoteName('applied') . ' = 1'));

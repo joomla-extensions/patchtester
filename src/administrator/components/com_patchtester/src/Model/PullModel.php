@@ -45,7 +45,7 @@ class PullModel extends BaseDatabaseModel
      * @var    array
      * @since  2.0
      */
-    protected $nonProductionFolders
+    protected array $nonProductionFolders
         = [
             'build',
             'docs',
@@ -60,7 +60,7 @@ class PullModel extends BaseDatabaseModel
      * @var    array
      * @since  2.0
      */
-    protected $nonProductionFiles
+    protected array $nonProductionFiles
         = [
             '.drone.yml',
             '.gitignore',
@@ -88,10 +88,12 @@ class PullModel extends BaseDatabaseModel
      * @var    \JNamespacePsr4Map
      * @since  4.0.0
      */
-    protected $namespaceMapper;
+    protected \JNamespacePsr4Map $namespaceMapper;
 
     /**
      * @inheritDoc
+     *
+     * @since  4.0.0
      */
     public function __construct(
         $config = [],
@@ -112,7 +114,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @return  bool
      *
-     * @throws  \RuntimeException
+     * @throws  \RuntimeException|\Exception
      * @since   3.0
      *
      */
@@ -130,11 +132,11 @@ class PullModel extends BaseDatabaseModel
     /**
      * Patches the code with the supplied pull request
      *
-     * @param   integer  $id  ID of the pull request to apply
+     * @param   int  $id  ID of the pull request to apply
      *
-     * @return  boolean
+     * @return  bool
      *
-     * @throws  \RuntimeException
+     * @throws  \RuntimeException|\Exception
      * @since   3.0
      *
      */
@@ -177,7 +179,7 @@ class PullModel extends BaseDatabaseModel
         try {
             $http   = HttpFactory::getHttp($httpOption);
             $result = $http->get($serverZipPath);
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException) {
             $result = null;
         }
 
@@ -305,7 +307,7 @@ class PullModel extends BaseDatabaseModel
      * Patches the code with the supplied pull request
      *
      * @param   GitHub   $github  github object
-     * @param   integer  $id      Id of the pull request
+     * @param   int      $id      Id of the pull request
      *
      * @return  \stdClass The pull request data
      *
@@ -365,16 +367,15 @@ class PullModel extends BaseDatabaseModel
      *
      * @param   string  $path  The path to look for the autoloader
      *
-     * @return  boolean  True if there are broken dependencies | False otherwise.
+     * @return  bool  True if there are broken dependencies | False otherwise.
      *
      * @since   4.0.0
      */
     private function verifyAutoloader(string $path): bool
     {
-        $result = false;
         // Check if we have an autoload file
         if (!file_exists($path . '/libraries/vendor/autoload.php')) {
-            return $result;
+            return false;
         }
 
         $composerFiles = [
@@ -461,12 +462,13 @@ class PullModel extends BaseDatabaseModel
     /**
      * Saves the applied patch into database
      *
-     * @param   integer  $id        ID of the applied pull request
-     * @param   array    $fileList  List of files
-     * @param   string   $sha       sha-key from pull request
+     * @param   int          $id        ID of the applied pull request
+     * @param   array        $fileList  List of files
+     * @param   string|null  $sha       sha-key from pull request
      *
-     * @return  integer  $id    last inserted id
+     * @return  int  last inserted id
      *
+     * @throws \Exception
      * @since   3.0
      */
     private function saveAppliedPatch(
@@ -477,7 +479,7 @@ class PullModel extends BaseDatabaseModel
         $record = (object)[
             'pull_id'         => $id,
             'data'            => json_encode($fileList),
-            'patched_by'      => Factory::getUser()->id,
+            'patched_by'      => Factory::getApplication()->getIdentity()->id,
             'applied'         => 1,
             'applied_version' => JVERSION,
         ];
@@ -487,7 +489,7 @@ class PullModel extends BaseDatabaseModel
         if ($sha !== null) {
             // Insert the retrieved commit SHA into the pulls table for this item
             $db->setQuery(
-                $db->getQuery(true)
+                $db->createQuery()
                     ->update('#__patchtester_pulls')
                     ->set('sha = ' . $db->quote($sha))
                     ->where($db->quoteName('pull_id') . ' = ' . $id)
@@ -500,11 +502,11 @@ class PullModel extends BaseDatabaseModel
     /**
      * Patches the code with the supplied pull request
      *
-     * @param   integer  $id  ID of the pull request to apply
+     * @param   int  $id  ID of the pull request to apply
      *
-     * @return  boolean
+     * @return  bool
      *
-     * @throws  \RuntimeException
+     * @throws  \RuntimeException|\Exception
      * @since   2.0
      *
      */
@@ -589,18 +591,14 @@ class PullModel extends BaseDatabaseModel
                             false
                         );
                         // In case encoding type ever changes
-                        switch ($contents->encoding) {
-                            case 'base64':
-                                $file->body = base64_decode($contents->content);
-
-                                break;
-                            default:
-                                throw new \RuntimeException(
-                                    Text::_(
-                                        'COM_PATCHTESTER_ERROR_UNSUPPORTED_ENCODING'
-                                    )
-                                );
-                        }
+                        $file->body = match ($contents->encoding) {
+                            'base64' => base64_decode($contents->content),
+                            default  => throw new \RuntimeException(
+                                Text::_(
+                                    'COM_PATCHTESTER_ERROR_UNSUPPORTED_ENCODING'
+                                )
+                            ),
+                        };
                     } catch (UnexpectedResponse $exception) {
                         throw new \RuntimeException(
                             Text::sprintf(
@@ -749,7 +747,7 @@ class PullModel extends BaseDatabaseModel
     /**
      * Parse the list of modified files from a pull request
      *
-     * @param   \stdClass  $files  The modified files to parse
+     * @param   array  $files  The modified files to parse
      *
      * @return  array
      *
@@ -813,9 +811,9 @@ class PullModel extends BaseDatabaseModel
      * Reverts the specified pull request
      * However uses different methods for different repositories.
      *
-     * @param   integer  $id  ID of the pull request to revert
+     * @param   int  $id  ID of the pull request to revert
      *
-     * @return  boolean
+     * @return  bool
      *
      * @throws  \RuntimeException
      * @since   3.0
@@ -834,9 +832,9 @@ class PullModel extends BaseDatabaseModel
     /**
      * Reverts the specified pull request with CIServer options
      *
-     * @param   integer  $id  ID of the pull request to revert
+     * @param   int  $id  ID of the pull request to revert
      *
-     * @return  boolean
+     * @return  bool
      *
      * @throws  \RuntimeException
      * @since   3.0
@@ -919,9 +917,9 @@ class PullModel extends BaseDatabaseModel
     /**
      * Retrieves test data from database by specific id
      *
-     * @param   integer  $id  ID of the record
+     * @param   int  $id  ID of the record
      *
-     * @return  \stdClass  $testRecord  The record looking for
+     * @return  \stdClass  The record looking for
      *
      * @since   3.0.0
      */
@@ -930,10 +928,10 @@ class PullModel extends BaseDatabaseModel
         $db = $this->getDatabase();
 
         return $db->setQuery(
-            $db->getQuery(true)
+            $db->createQuery()
                 ->select('*')
                 ->from('#__patchtester_tests')
-                ->where('id = ' . (int)$id)
+                ->where('id = ' . $id)
         )->loadObject();
     }
 
@@ -942,7 +940,7 @@ class PullModel extends BaseDatabaseModel
      *
      * @param   \stdClass  $testRecord  The record being deleted
      *
-     * @return  boolean
+     * @return  bool
      *
      * @since   3.0.0
      */
@@ -951,14 +949,14 @@ class PullModel extends BaseDatabaseModel
         $db = $this->getDatabase();
         // Remove the retrieved commit SHA from the pulls table for this item
         $db->setQuery(
-            $db->getQuery(true)
+            $db->createQuery()
                 ->update('#__patchtester_pulls')
                 ->set('sha = ' . $db->quote(''))
                 ->where($db->quoteName('id') . ' = ' . (int)$testRecord->id)
         )->execute();
         // And delete the record from the tests table
         $db->setQuery(
-            $db->getQuery(true)
+            $db->createQuery()
                 ->delete('#__patchtester_tests')
                 ->where('id = ' . (int)$testRecord->id)
         )->execute();
@@ -969,9 +967,9 @@ class PullModel extends BaseDatabaseModel
     /**
      * Reverts the specified pull request with Github Requests
      *
-     * @param   integer  $id  ID of the pull request to revert
+     * @param   int  $id  ID of the pull request to revert
      *
-     * @return  boolean
+     * @return  bool
      *
      * @throws  \RuntimeException
      * @since   2.0
