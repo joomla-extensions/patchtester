@@ -287,7 +287,7 @@ class PullsModel extends ListModel
                 . $db->quoteName('pulls.pull_id')
             )
                 ->where(
-                    $db->quoteName('pulls_labels.labelCount') . ' = ' . count(
+                    $db->quoteName('pulls_labels.labelCount') . ' = ' . \count(
                         $labels
                     )
                 );
@@ -361,7 +361,7 @@ class PullsModel extends ListModel
             $lastPage = 1;
             if ($linkHeader = $pullsResponse->getHeader('link')) {
                 // The `joomla/http` 2.0 package uses PSR-7 Responses which has a different format for headers, check for this
-                if (is_array($linkHeader)) {
+                if (\is_array($linkHeader)) {
                     $linkHeader = $linkHeader[0];
                 }
 
@@ -400,7 +400,7 @@ class PullsModel extends ListModel
                 if (strtolower($label->name) === 'rtc') {
                     $isRTC = true;
                 } elseif (
-                    in_array(
+                    \in_array(
                         strtolower($label->name),
                         ['npm resource changed', 'composer dependency changed'],
                         true
@@ -435,7 +435,7 @@ class PullsModel extends ListModel
         }
 
         // If there are no pulls to insert then bail, assume we're finished
-        if (count($data) === 0) {
+        if (\count($data) === 0) {
             return ['complete' => true];
         }
 
