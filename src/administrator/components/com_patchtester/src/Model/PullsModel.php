@@ -9,7 +9,6 @@
 
 namespace Joomla\Component\Patchtester\Administrator\Model;
 
-use Exception;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\ListModel;
@@ -18,7 +17,6 @@ use Joomla\Component\Patchtester\Administrator\GithubCredentialsTrait;
 use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Database\ParameterType;
-use RuntimeException;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -54,7 +52,7 @@ class PullsModel extends ListModel
      *
      * @param   array  $config  An optional associative array of configuration settings.
      *
-     * @throws  Exception
+     * @throws  \Exception
      *
      * @since   4.0.0
      */
@@ -155,7 +153,7 @@ class PullsModel extends ListModel
      *
      * @return  array  An array of results.
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   2.0
      */
     protected function getList(
@@ -326,7 +324,7 @@ class PullsModel extends ListModel
      *
      * @return  array
      *
-     * @throws  RuntimeException
+     * @throws  \RuntimeException
      * @since   2.0
      */
     public function requestFromGithub(int $page): array
@@ -347,7 +345,7 @@ class PullsModel extends ListModel
             );
             $pulls         = json_decode((string) $pullsResponse->getBody());
         } catch (UnexpectedResponse $exception) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_ERROR_GITHUB_FETCH',
                     $exception->getMessage()
@@ -458,8 +456,8 @@ class PullsModel extends ListModel
                     ->values($data)
             );
             $this->getDatabase()->execute();
-        } catch (RuntimeException $exception) {
-            throw new RuntimeException(
+        } catch (\RuntimeException $exception) {
+            throw new \RuntimeException(
                 Text::sprintf(
                     'COM_PATCHTESTER_ERROR_INSERT_DATABASE',
                     $exception->getMessage()
@@ -478,8 +476,8 @@ class PullsModel extends ListModel
                         ->values($labels)
                 );
                 $this->getDatabase()->execute();
-            } catch (RuntimeException $exception) {
-                throw new RuntimeException(
+            } catch (\RuntimeException $exception) {
+                throw new \RuntimeException(
                     Text::sprintf(
                         'COM_PATCHTESTER_ERROR_INSERT_DATABASE',
                         $exception->getMessage()
