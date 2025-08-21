@@ -9,6 +9,7 @@
 
 # Build #
 /build/logs
+/dist
 
 # IDE & System #
 /.buildpath
@@ -18,4 +19,4 @@
 /.idea
 
 # Composer Install #
-/administrator/components/com_patchtester/vendor
+/vendor

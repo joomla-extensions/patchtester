@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="component" method="upgrade">
+	<name>com_patchtester</name>
+	<author>Joomla! Project</author>
+	<creationDate>2025-08-15</creationDate>
+	<copyright>(C) 2011 - 2012 Ian MacLennan, (C) 2013 - 2018 Open Source Matters, Inc. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later</license>
+	<authorEmail>admin@joomla.org</authorEmail>
+	<authorUrl>https://www.joomla.org</authorUrl>
+	<version>5.0.0</version>
+	<description>COM_PATCHTESTER_XML_DESCRIPTION</description>
+	<namespace path="src">Joomla\Component\Patchtester</namespace>
+	<scriptfile>script.php</scriptfile>
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">install/sql/mysql/install.sql</file>
+			<file driver="postgresql" charset="utf8">install/sql/postgresql/install.sql</file>
+			<file driver="pgsql" charset="utf8">install/sql/postgresql/install.sql</file>
+		</sql>
+	</install>
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">install/sql/mysql/uninstall.sql</file>
+			<file driver="postgresql" charset="utf8">install/sql/postgresql/uninstall.sql</file>
+			<file driver="pgsql" charset="utf8">install/sql/postgresql/uninstall.sql</file>
+		</sql>
+	</uninstall>
+	<update>
+		<schemas>
+			<schemapath type="mysql">install/sql/updates/mysql</schemapath>
+			<schemapath type="postgresql">install/sql/updates/postgresql</schemapath>
+			<schemapath type="pgsql">install/sql/updates/postgresql</schemapath>
+		</schemas>
+	</update>
+	<media destination="com_patchtester" folder="media/com_patchtester">
+		##MEDIA_FILES##
+	</media>
+	<administration>
+		<menu img="../media/com_patchtester/images/icon-16-patchtester.png" view="pulls">com_patchtester</menu>
+		<files folder="administrator/components/com_patchtester">
+			##BACKEND_COMPONENT_FILES##
+		</files>
+	</administration>
+	<updateservers>
+		<server type="extension" name="Patch Tester Component">https://raw.githubusercontent.com/joomla-extensions/patchtester/master/manifest.xml</server>
+	</updateservers>
+</extension>
