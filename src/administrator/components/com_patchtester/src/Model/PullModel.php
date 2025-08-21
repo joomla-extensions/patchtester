@@ -9,10 +9,8 @@
 
 namespace Joomla\Component\Patchtester\Administrator\Model;
 
-use Joomla\Archive\Zip;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
@@ -24,7 +22,6 @@ use Joomla\Component\Patchtester\Administrator\Helper\Helper;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Filesystem\Path;
-use Joomla\Registry\Registry;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -120,187 +117,7 @@ class PullModel extends BaseDatabaseModel
      */
     public function apply(int $id): bool
     {
-        $params = ComponentHelper::getParams('com_patchtester');
-        // Decide based on repository settings whether patch will be applied through Github or CIServer
-        if ((bool)$params->get('ci_switch', 0)) {
-            return $this->applyWithCIServer($id);
-        }
-
         return $this->applyWithGitHub($id);
-    }
-
-    /**
-     * Patches the code with the supplied pull request
-     *
-     * @param   int  $id  ID of the pull request to apply
-     *
-     * @return  bool
-     *
-     * @throws  \RuntimeException|\Exception
-     * @since   3.0
-     *
-     */
-    private function applyWithCIServer(int $id): bool
-    {
-        // Get the CIServer Registry
-        $ciSettings = Helper::initializeCISettings();
-        // Get the Github object
-        $github = Helper::initializeGithub();
-        // Retrieve pullData for sha later on.
-        $pull = $this->retrieveGitHubData($github, $id);
-        if ($pull->head->repo === null) {
-            throw new \RuntimeException(Text::_('COM_PATCHTESTER_REPO_IS_GONE'));
-        }
-
-        $sha = $pull->head->sha;
-        // Create tmp folder if it does not exist
-        if (!file_exists($ciSettings->get('folder.temp'))) {
-            Folder::create($ciSettings->get('folder.temp'));
-        }
-
-        $tempPath      = $ciSettings->get('folder.temp') . '/' . $id;
-        $backupsPath   = $ciSettings->get('folder.backups') . '/' . $id;
-        $delLogPath    = $tempPath . '/' . $ciSettings->get('zip.log.name');
-        $zipPath       = $tempPath . '/' . $ciSettings->get('zip.name');
-        $serverZipPath = \sprintf($ciSettings->get('zip.url'), $id);
-        // Patch has already been applied
-        if (file_exists($backupsPath)) {
-            return false;
-        }
-
-        $version    = new Version();
-        $httpOption = new Registry();
-        $httpOption->set(
-            'userAgent',
-            $version->getUserAgent('Joomla', true, false)
-        );
-
-        // Try to download the zip file
-        try {
-            $http   = HttpFactory::getHttp($httpOption);
-            $result = $http->get($serverZipPath);
-        } catch (\RuntimeException) {
-            $result = null;
-        }
-
-        if (
-            $result === null
-            || ($result->getStatusCode() !== 200
-                && $result->getStatusCode() !== 310)
-        ) {
-            throw new \RuntimeException(
-                Text::_('COM_PATCHTESTER_SERVER_RESPONDED_NOT_200')
-            );
-        }
-
-        // Assign to variable to avlod PHP notice "Indirect modification of overloaded property"
-        $content = (string)$result->getBody();
-        // Write the file to disk
-        File::write($zipPath, $content);
-        // Check if zip folder could have been downloaded
-        if (!file_exists($zipPath)) {
-            throw new \RuntimeException(
-                Text::_('COM_PATCHTESTER_ZIP_DOES_NOT_EXIST')
-            );
-        }
-
-        Folder::create($tempPath);
-        $zip = new Zip();
-        if (!$zip->extract($zipPath, $tempPath)) {
-            Folder::delete($tempPath);
-            throw new \RuntimeException(
-                Text::_('COM_PATCHTESTER_ZIP_EXTRACT_FAILED')
-            );
-        }
-
-        // Remove zip to avoid get listing afterwards
-        File::delete($zipPath);
-        // Verify the composer autoloader for any invalid entries
-        if ($this->verifyAutoloader($tempPath) === false) {
-            // There is something broken in the autoloader, clean up and go back
-            Folder::delete($tempPath);
-            throw new \RuntimeException(
-                Text::_('COM_PATCHTESTER_PATCH_BREAKS_SITE')
-            );
-        }
-
-        // Get files from deleted_logs
-        $deletedFiles = (file_exists($delLogPath) ? file($delLogPath) : []);
-        $deletedFiles = array_map('trim', $deletedFiles);
-        if (file_exists($delLogPath)) {
-            // Remove deleted_logs to avoid get listing afterwards
-            File::delete($delLogPath);
-        }
-
-        // Retrieve all files and merge them into one array
-        $files = Folder::files($tempPath, null, true, true);
-        $files = str_replace(Path::clean($tempPath . '\\'), '', $files);
-        $files = array_merge($files, $deletedFiles);
-        Folder::create($backupsPath);
-        // Moves existent files to backup and replace them or creates new one if they don't exist
-        foreach ($files as $key => $file) {
-            try {
-                $filePath = explode(DIRECTORY_SEPARATOR, Path::clean($file));
-                array_pop($filePath);
-                $filePath = implode(DIRECTORY_SEPARATOR, $filePath);
-                // Deleted_logs returns files as well as folder, if value is folder, unset and skip
-                if (is_dir(JPATH_ROOT . '/' . $file)) {
-                    unset($files[$key]);
-                    continue;
-                }
-
-                if (file_exists(JPATH_ROOT . '/' . $file)) {
-                    // Create directories if they don't exist until file
-                    if (!file_exists($backupsPath . '/' . $filePath)) {
-                        Folder::create($backupsPath . '/' . $filePath);
-                    }
-
-                    File::move(
-                        JPATH_ROOT . '/' . $file,
-                        $backupsPath . '/' . $file
-                    );
-                }
-
-                if (file_exists($tempPath . '/' . $file)) {
-                    // Create directories if they don't exist until file
-                    if (
-                        !file_exists(JPATH_ROOT . '/' . $filePath)
-                        || !is_dir(
-                            JPATH_ROOT . '/' . $filePath
-                        )
-                    ) {
-                        Folder::create(JPATH_ROOT . '/' . $filePath);
-                    }
-
-                    File::copy(
-                        $tempPath . '/' . $file,
-                        JPATH_ROOT . '/' . $file
-                    );
-                }
-            } catch (\RuntimeException $exception) {
-                Folder::delete($tempPath);
-                Folder::move($backupsPath, $backupsPath . '_failed');
-
-                throw new \RuntimeException(
-                    Text::sprintf(
-                        'COM_PATCHTESTER_FAILED_APPLYING_PATCH',
-                        $file,
-                        $exception->getMessage()
-                    )
-                );
-            }
-        }
-
-        // Clear temp folder and store applied patch in database
-        Folder::delete($tempPath);
-        $this->saveAppliedPatch($id, $files, $sha);
-        // Update the autoloader file
-        $this->namespaceMapper->create();
-        // Change the media version
-        $version = new Version();
-        $version->refreshMediaVersion();
-
-        return true;
     }
 
     /**

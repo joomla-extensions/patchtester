@@ -89,34 +89,6 @@
 	</fieldset>
 
 	<fieldset
-			name="ci_settings"
-			label="COM_PATCHTESTER_FIELDSET_CI_SETTINGS"
-			description="COM_PATCHTESTER_FIELDSET_CI_SETTINGS_DESC"
-	>
-
-		<field
-				name="ci_server"
-				type="text"
-				label="COM_PATCHTESTER_FIELD_CI_SERVER_NAME"
-				description="COM_PATCHTESTER_FIELD_CI_SERVER_NAME_DESC"
-				autocomplete="off"
-				default="https://ci.joomla.org"
-		/>
-
-		<field
-				name="ci_switch"
-				type="list"
-				label="COM_PATCHTESTER_FIELD_CI_SERVER_SWITCH"
-				description="COM_PATCHTESTER_FIELD_CI_SERVER_SWITCH_DESC"
-				default="0"
-		>
-			<option value="1">COM_PATCHTESTER_FIELD_CI_SERVER_SWITCH_OPTION_ON</option>
-			<option value="0">COM_PATCHTESTER_FIELD_CI_SERVER_SWITCH_OPTION_OFF</option>
-		</field>
-
-	</fieldset>
-
-	<fieldset
 			name="permissions"
 			label="JCONFIG_PERMISSIONS_LABEL"
 			description="JCONFIG_PERMISSIONS_DESC"

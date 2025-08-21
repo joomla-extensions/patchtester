@@ -31,6 +31,7 @@ abstract class Helper
      *
      * @return  GitHub
      *
+     * @throws \Exception
      * @since   2.0
      */
     public static function initializeGithub()
@@ -52,29 +53,5 @@ abstract class Helper
         }
 
         return new GitHub($options);
-    }
-
-    /**
-     * Initializes the CI Settings
-     *
-     * @return  Registry
-     *
-     * @since   3.0
-     */
-    public static function initializeCISettings()
-    {
-        $params  = ComponentHelper::getParams('com_patchtester');
-        $options = new Registry();
-        // Set CI server address for the request
-        $options->set('server.url', $params->get('ci_server', 'https://ci.joomla.org:444'));
-        // Set name of the zip archive
-        $options->set('zip.name', 'build.zip');
-        $options->set('zip.log.name', 'deleted_files.log');
-        // Set temp archive for extracting and downloading files
-        $options->set('folder.temp', Factory::getConfig()->get('tmp_path'));
-        $options->set('folder.backups', JPATH_COMPONENT . '/backups');
-        // Set full url for addressing the file
-        $options->set('zip.url', $options->get('server.url') . '/artifacts/joomla/joomla-cms/4.0-dev/%s/patchtester/' . $options->get('zip.name'));
-        return $options;
     }
 }
