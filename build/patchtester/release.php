@@ -34,7 +34,7 @@ function usage($command)
     echo PHP_EOL;
 }
 
-$manifestFile     = '/administrator/components/com_patchtester/patchtester.xml';
+$manifestFile     = '/src/administrator/components/com_patchtester/patchtester.xml';
 $updateServerFile = '/manifest.xml';
 
 // Check arguments (exit if incorrect cli arguments).
@@ -101,7 +101,7 @@ if (file_exists($rootPath . $manifestFile)) {
 }
 
 // Replaces the `__DEPLOY_VERSION__` marker with the "release" version number
-system('cd ' . $rootPath . ' && find administrator -name "*.php" -type f -exec sed -i "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
+system('cd ' . $rootPath . ' && find src/administrator -name "*.php" -type f -exec sed -i "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
 
 // If not instructed to exclude it, update the update server's manifest
 if (!isset($opts['exclude-manifest'])) {
