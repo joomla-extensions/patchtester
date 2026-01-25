@@ -84,7 +84,7 @@ class Com_PatchtesterInstallerScript extends InstallerScript
 
 
     /**
-     * Show the message on install.
+     * Show the message on uninstall.
      *
      * @param   ComponentAdapter  $parent  The class calling this method
      *
@@ -95,9 +95,6 @@ class Com_PatchtesterInstallerScript extends InstallerScript
     public function uninstall(ComponentAdapter $parent): void
     {
         ?>
-       <h1>
-            <?php echo HTMLHelper::_('image', 'media/com_patchtester/images/icon-48-patchtester.png', Text::_('COM_PATCHTESTER')); ?>
-     </h1>
         <p><?php echo Text::_('COM_PATCHTESTER_UNINSTALL_THANK_YOU'); ?></p>
         <?php
     }
