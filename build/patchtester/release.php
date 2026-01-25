@@ -34,7 +34,7 @@ function usage($command)
     echo PHP_EOL;
 }
 
-$manifestFile     = '/administrator/components/com_patchtester/patchtester.xml';
+$manifestFile     = '/src/administrator/components/com_patchtester/patchtester.xml';
 $updateServerFile = '/manifest.xml';
 
 // Check arguments (exit if incorrect cli arguments).
@@ -90,7 +90,7 @@ echo '- Dev Level:' . PHP_TAB . PHP_TAB . $version['dev_devel'] . PHP_EOL;
 echo '- Creation date:' . PHP_TAB . $version['credate'] . PHP_EOL;
 echo PHP_EOL;
 
-$rootPath = dirname(dirname(__DIR__));
+$rootPath = dirname(__DIR__, 2);
 
 // Updates the version and creation date in the component manifest file.
 if (file_exists($rootPath . $manifestFile)) {
@@ -101,7 +101,7 @@ if (file_exists($rootPath . $manifestFile)) {
 }
 
 // Replaces the `__DEPLOY_VERSION__` marker with the "release" version number
-system('cd ' . $rootPath . ' && find administrator -name "*.php" -type f -exec sed -i "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
+system('cd ' . $rootPath . ' && find src/administrator -name "*.php" -type f -exec sed -i "s/__DEPLOY_VERSION__/' . $version['release'] . '/g" "{}" \;');
 
 // If not instructed to exclude it, update the update server's manifest
 if (!isset($opts['exclude-manifest'])) {
@@ -114,7 +114,7 @@ if (!isset($opts['exclude-manifest'])) {
         echo '*************' . PHP_EOL;
         echo '* IMPORTANT *' . PHP_EOL;
         echo '*************' . PHP_EOL;
-        echo '' . PHP_EOL;
+        echo PHP_EOL;
         echo 'Ensure you regenerate the SHA384 package hash before publishing the updated manifest!!!' . PHP_EOL;
     }
 }

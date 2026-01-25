@@ -4,7 +4,7 @@ rm -rf build/packaging && mkdir build/packaging
 rm -rf build/packages && mkdir build/packages
 composer install --no-dev -o
 cp -r src/administrator build/packaging/administrator
-cp -r src/media/com_patchtester build/packaging/media
+cp -r src/media build/packaging/media
 rm -rf build/packaging/administrator/backups/*.txt
 mv build/packaging/administrator/components/com_patchtester/patchtester.xml build/packaging/patchtester.xml
 mv build/packaging/administrator/components/com_patchtester/script.php build/packaging/script.php
