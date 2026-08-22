@@ -70,6 +70,7 @@ class PullModel extends BaseDatabaseModel
             'build.xml',
             'composer.json',
             'composer.lock',
+            'phpstan-baseline.neon',
             'phpunit.xml.dist',
             'robots.txt.dist',
             'travisci-phpunit.xml',
